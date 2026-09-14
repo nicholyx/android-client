@@ -6,7 +6,7 @@ import { Profile } from '../model/Profile';
 import { EngineManager } from '../engine/EngineManager';
 import { Keys } from '../common/Constants';
 import { Formatters } from '../common/Formatters';
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 
 /*
  * Home screen — the ArkUI equivalent of HomeFragment/fragment_home.xml.
@@ -169,7 +169,7 @@ export struct HomePage {
       .borderRadius(20)
       .border({ width: 1, color: $r('app.color.nb_chip_border') })
       .margin({ top: 12 })
-      .onClick(() => NavRouter.push(Routes.PROFILES))
+      .onClick(() => AppNav.push(Routes.PROFILES))
 
       // Wordmark + toggle + status block
       Column() {

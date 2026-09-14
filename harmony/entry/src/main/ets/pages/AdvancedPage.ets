@@ -78,6 +78,16 @@ export struct AdvancedPage {
       })
   }
 
+  /* 本 SDK（5.0.1）的 NavDestination.title 不接受 Resource，用局部 @Builder
+   * 渲染 $r 并显式给出 CustomTitle 必需的 height（此版 SDK 为必填字段）。 */
+  @Builder
+  DestTitle() {
+    Text($r('app.string.menu_advanced'))
+      .fontSize(20)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('app.color.nb_txt'))
+  }
+
   build() {
     NavDestination() {
       Scroll() {
@@ -158,7 +168,7 @@ export struct AdvancedPage {
       .height('100%')
       .scrollBar(BarState.Off)
     }
-    .title($r('app.string.menu_advanced'))
+    .title({ builder: this.DestTitle, height: TitleHeight.MainOnly })
     .backgroundColor($r('app.color.nb_bg'))
   }
 }

@@ -73,6 +73,9 @@ jobs:
           set -euo pipefail
           export DEVECO_SDK_HOME="$HOME/command-line-tools/sdk"
           export PATH="$HOME/command-line-tools/bin:$PATH"
+          # 默认注册表 mirrors.tools.huawei.com 从 GitHub runner 不可达，
+          # 显式指向 OpenHarmony 公网注册表。
+          ohpm config set registry https://ohpm.openharmony.cn/ohpm/
           hvigorw --version
           ohpm install --all
 

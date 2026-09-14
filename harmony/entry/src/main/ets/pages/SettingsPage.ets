@@ -5,7 +5,7 @@ import { SectionHeader, NavRow } from '../components/SettingRows';
 import { EngineManager } from '../engine/EngineManager';
 import { Urls } from '../common/Constants';
 import { UrlOpener } from '../common/UrlOpener';
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 import { Profile } from '../model/Profile';
 
 interface LanguageOption {
@@ -93,14 +93,14 @@ export struct SettingsPage {
         NavRow({
           title: $r('app.string.menu_profiles'),
           subtitle: this.activeProfileName(),
-          onTap: () => NavRouter.push(Routes.PROFILES)
+          onTap: () => AppNav.push(Routes.PROFILES)
         })
 
         SectionHeader({ title: $r('app.string.settings_section_settings') })
-        NavRow({ title: $r('app.string.menu_advanced'), onTap: () => NavRouter.push(Routes.ADVANCED) })
+        NavRow({ title: $r('app.string.menu_advanced'), onTap: () => AppNav.push(Routes.ADVANCED) })
         NavRow({
           title: $r('app.string.menu_split_tunneling'),
-          onTap: () => NavRouter.push(Routes.SPLIT_TUNNELING)
+          onTap: () => AppNav.push(Routes.SPLIT_TUNNELING)
         })
         NavRow({
           title: $r('app.string.settings_language'),
@@ -111,8 +111,8 @@ export struct SettingsPage {
         })
 
         SectionHeader({ title: $r('app.string.settings_section_information') })
-        NavRow({ title: $r('app.string.menu_troubleshoot'), onTap: () => NavRouter.push(Routes.TROUBLESHOOT) })
-        NavRow({ title: $r('app.string.menu_about'), onTap: () => NavRouter.push(Routes.ABOUT) })
+        NavRow({ title: $r('app.string.menu_troubleshoot'), onTap: () => AppNav.push(Routes.TROUBLESHOOT) })
+        NavRow({ title: $r('app.string.menu_about'), onTap: () => AppNav.push(Routes.ABOUT) })
         NavRow({
           title: $r('app.string.settings_documentation'),
           onTap: () => UrlOpener.open(getContext(this) as common.UIAbilityContext, Urls.DOCS)

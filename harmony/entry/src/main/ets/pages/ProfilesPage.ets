@@ -123,6 +123,16 @@ export struct ProfilesPage {
     .backgroundColor($r('app.color.nb_sheet_bg'))
   }
 
+  /* 本 SDK（5.0.1）的 NavDestination.title 不接受 Resource，用局部 @Builder
+   * 渲染 $r 并显式给出 CustomTitle 必需的 height（此版 SDK 为必填字段）。 */
+  @Builder
+  DestTitle() {
+    Text($r('app.string.menu_profiles'))
+      .fontSize(20)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('app.color.nb_txt'))
+  }
+
   build() {
     NavDestination() {
       Stack({ alignContent: Alignment.BottomEnd }) {
@@ -196,7 +206,7 @@ export struct ProfilesPage {
           }, (profile: Profile) => profile.id)
 
           ListItem() {
-            Blank().height(88)
+            Row().height(88)
           }
         }
         .width('100%')
@@ -218,7 +228,7 @@ export struct ProfilesPage {
       .width('100%')
       .height('100%')
     }
-    .title($r('app.string.menu_profiles'))
+    .title({ builder: this.DestTitle, height: TitleHeight.MainOnly })
     .backgroundColor($r('app.color.profile_background'))
     .bindSheet(this.addSheet, this.AddSheet(), {
       height: SheetSize.FIT_CONTENT,

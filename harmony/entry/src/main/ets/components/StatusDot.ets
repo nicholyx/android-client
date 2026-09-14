@@ -7,12 +7,12 @@ import { PeerStatus, StatusMapper } from '../model/Status';
 @Component
 export struct StatusDot {
   @Prop status: PeerStatus = PeerStatus.UNKNOWN;
-  @Prop size: number = 8;
+  @Prop dotSize: number = 8
 
   build() {
     Circle()
-      .width(this.size)
-      .height(this.size)
+      .width(this.dotSize)
+      .height(this.dotSize)
       .fill(StatusMapper.colorResource(this.status))
   }
 }

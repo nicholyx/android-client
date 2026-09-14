@@ -3,7 +3,7 @@ import { EngineManager } from '../engine/EngineManager';
 import { Keys } from '../common/Constants';
 import { StatusDot } from '../components/StatusDot';
 import { PeerStatus } from '../model/Status';
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 import { SshTarget } from './PeerDetailPage';
 import { promptAction } from '@kit.ArkUI';
 
@@ -129,7 +129,7 @@ export struct SshSessionsPage {
             ForEach(this.sessions, (session: SshSession) => {
               ListItem() {
                 Row() {
-                  StatusDot({ status: this.stateDot(session), size: 9 })
+                  StatusDot({ status: this.stateDot(session), dotSize: 9 })
                   Column() {
                     Text(session.title)
                       .fontSize(15)
@@ -157,7 +157,7 @@ export struct SshSessionsPage {
                 .padding({ left: 20, right: 16 })
                 .alignItems(VerticalAlign.Center)
                 .backgroundColor($r('app.color.info_row_bg'))
-                .onClick(() => NavRouter.push(Routes.SSH_TERMINAL,
+                .onClick(() => AppNav.push(Routes.SSH_TERMINAL,
                   new SshTarget(session.host, session.port, session.user)))
               }
             }, (session: SshSession) => session.id)

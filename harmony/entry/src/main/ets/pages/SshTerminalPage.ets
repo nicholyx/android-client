@@ -96,13 +96,12 @@ export struct SshTerminalPage {
 
         // Command line
         Row() {
-          TextInput({ text: this.input })
+          TextInput({ text: this.input, placeholder: "command" })
             .layoutWeight(1)
             .height(44)
             .backgroundColor('#22262C')
             .fontColor('#D6DEE8')
             .fontFamily('monospace')
-            .placeholder('command')
             .placeholderColor('#5A616B')
             .onChange((v: string) => {
               this.input = v;
@@ -126,7 +125,7 @@ export struct SshTerminalPage {
     .title(this.target.host.length > 0 ? `${this.target.user}@${this.target.host}` : 'SSH Terminal')
     .backgroundColor('#14161A')
     .onReady((ctx: NavDestinationContext) => {
-      const param: Object | undefined = ctx.pathInfo.param;
+      const param = ctx.pathInfo.param as Object | undefined;
       if (param instanceof SshTarget) {
         this.target = param;
       }

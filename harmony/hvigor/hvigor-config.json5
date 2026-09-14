@@ -10,10 +10,6 @@
   "logging": {
     "level": "info"
   },
-  "pluginRepository": {
-    "registry": "https://repo.harmonyos.com/ohpm/",
-    "registries": {}
-  },
   "nodeOptions": {
     "maxOldSpaceSize": 8192
   }
