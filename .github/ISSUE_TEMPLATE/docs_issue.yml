@@ -1,0 +1,22 @@
+name: 文档问题
+description: 文档缺失、过时或有误
+labels: ["documentation"]
+body:
+  - type: input
+    id: location
+    attributes:
+      label: 位置
+      description: 哪个文件 / 哪一段？
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题
+      description: 缺失 / 过时 / 有误？如果是「与代码实际行为不符」，请说明实际行为。
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 修改建议

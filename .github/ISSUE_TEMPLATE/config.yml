@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 使用问题（Q&A）
+    url: ../../discussions/categories/q-a
+    about: 「怎么用 / 怎么配」类问题请到 Discussions，不占用 Issue 列表
+  - name: 安全漏洞
+    url: ../SECURITY.md
+    about: 请勿公开提交，按 SECURITY.md 私密上报

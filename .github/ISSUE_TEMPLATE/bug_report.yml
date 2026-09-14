@@ -1,0 +1,48 @@
+name: Bug 报告
+description: 与预期行为不符的问题
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提交前请先搜索 [已有 Issue](../../issues?q=is%3Aissue) 避免重复；
+        使用问题请到 Discussions › Q&A；安全漏洞请走 [SECURITY.md](../blob/main/SECURITY.md) 的私密渠道。
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 平台
+      options:
+        - HarmonyOS
+        - Android
+        - 两者
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象描述
+      description: 期望行为与实际行为。**报错请保留原文**，方便他人搜索。
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      placeholder: |
+        1. 打开…
+        2. 点击…
+        3. 出现…
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本 / 环境
+      placeholder: "如：HarmonyOS NEXT 5.0 / Android 15，应用版本号或 commit"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: 日志 / 截图
+      description: 有助于定位的日志、截图或录屏；注意先脱敏。
