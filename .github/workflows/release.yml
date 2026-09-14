@@ -40,15 +40,9 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Cache commandline-tools
-        id: ct-cache
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
-        with:
-          path: ~/command-line-tools
-          key: commandline-tools-linux-x64-${{ env.CT_VERSION }}
-
+      # 不用 Actions cache：release 只在人工打 tag 时触发，频次极低，
+      # 3GB 下载可接受——换取 zizmor cache-poisoning 基线零豁免。
       - name: Download commandline-tools
-        if: steps.ct-cache.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           url="https://huggingface.co/csukuangfj/harmonyos-commandline-tools/resolve/main/commandline-tools-linux-x64-${CT_VERSION}.zip"

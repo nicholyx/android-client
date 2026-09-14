@@ -7,3 +7,9 @@ rules:
     # 依据：两个工作流虽用 pull_request_target 触发（以获得只读的 fork
     # PR 元数据），但都不 checkout PR 代码、不执行 PR 内容，仅以
     # GITHUB_TOKEN 写标签/评论——任意代码执行的前提不成立。
+  dangerous-triggers:
+    ignore:
+      - pr-labeler.yml
+      - welcome.yml
+    # 依据：同上——pull_request_target 本身是危险触发器，但这两个工作流
+    # 只按事件元数据打标签/评论，无 checkout、无 fork 代码执行面。
