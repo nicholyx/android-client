@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # 只管 GitHub Actions 生态：gradle 依赖与 netbird 子模块由上游流程管理
+  # （bump-netbird.yml），重复提交只会制造冲突。
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    cooldown:
+      default-days: 7
+    groups:
+      actions-minor:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
+    labels:
+      - "ci"
+      - "automation"

@@ -1,0 +1,30 @@
+harmony:
+  - changed-files:
+      - any-glob-to-any-file: "harmony/**"
+
+android:
+  - changed-files:
+      - any-glob-to-any-file: "app/**"
+      - any-glob-to-any-file: "tool/**"
+      - any-glob-to-any-file: "gomobile/**"
+      - any-glob-to-any-file: "netbird/**"
+      - any-glob-to-any-file: "gradle/**"
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file: ".github/workflows/**"
+      - any-glob-to-any-file: "scripts/**"
+
+governance:
+  - changed-files:
+      - any-glob-to-any-file: ".github/ISSUE_TEMPLATE/**"
+      - any-glob-to-any-file: ".github/CODEOWNERS"
+      - any-glob-to-any-file: "CONTRIBUTING.md"
+      - any-glob-to-any-file: "SECURITY.md"
+      - any-glob-to-any-file: "SUPPORT.md"
+      - any-glob-to-any-file: "CODE_OF_CONDUCT.md"
+
+documentation:
+  - changed-files:
+      - any-glob-to-any-file: "**/*.md"
+      - any-glob-to-any-file: "docs/**"

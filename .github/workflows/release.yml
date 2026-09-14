@@ -1,0 +1,109 @@
+name: release
+
+# 仅 tag 推送触发——Release 是人工验收后的显式动作（打 tag），
+# 自动构建产物只进 artifact（harmony-build.yml），两者必须分开。
+# 过滤器末尾带 * ：否则预发布 tag（如 v1.2.0-rc1）根本不触发本工作流。
+on:
+  push:
+    tags:
+      - "v*.*.*"
+      - "v*.*.*-*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CT_VERSION: "5.0.5.200"
+
+jobs:
+  build-and-release:
+    name: 构建 HAP 并发布
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Cache commandline-tools
+        id: ct-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/command-line-tools
+          key: commandline-tools-linux-x64-${{ env.CT_VERSION }}
+
+      - name: Download commandline-tools
+        if: steps.ct-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          url="https://huggingface.co/csukuangfj/harmonyos-commandline-tools/resolve/main/commandline-tools-linux-x64-${CT_VERSION}.zip"
+          curl -sSL --retry 3 -o /tmp/ct.zip "$url"
+          sha256sum /tmp/ct.zip | tee /tmp/ct.sha256
+          unzip -q /tmp/ct.zip -d ~/ct-extract
+          mv ~/ct-extract/command-line-tools ~/command-line-tools
+          rm -rf /tmp/ct.zip ~/ct-extract
+        env:
+          CT_VERSION: ${{ env.CT_VERSION }}
+
+      - name: Build HAP
+        working-directory: harmony
+        run: |
+          set -euo pipefail
+          export DEVECO_SDK_HOME="$HOME/command-line-tools/sdk"
+          export PATH="$HOME/command-line-tools/bin:$PATH"
+          ohpm config set registry https://ohpm.openharmony.cn/ohpm/
+          ohpm install --all
+          hvigorw assembleHap --mode module -p product=default -p buildMode=debug --no-daemon
+
+      - name: 收集 CHANGELOG 版本段
+        id: changelog
+        run: |
+          set -euo pipefail
+          ver="${GITHUB_REF_NAME#v}"
+          # -rc1 等预发布后缀从版本段标题里去掉
+          ver="${ver%%-*}"
+          if [[ -f CHANGELOG.md ]]; then
+            body="$(awk -v ver="$ver" 'BEGIN{p=0} /^## \[/ { if (p) exit; if ($0 ~ "^## \\[" ver "\\]") {p=1; next} } p' CHANGELOG.md)"
+          else
+            body=""
+          fi
+          if [[ -z "$body" ]]; then
+            body="（CHANGELOG.md 中未找到 ${ver} 的版本段）"
+          fi
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "$body"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: 创建 Release
+        run: |
+          set -euo pipefail
+          hap="$(ls harmony/entry/build/default/outputs/default/*.hap | head -1)"
+          renamed="netbird-${GITHUB_REF_NAME}-harmonyos.hap"
+          cp "$hap" "$renamed"
+          flags=("--title" "$GITHUB_REF_NAME" "--generate-notes")
+          if [[ "$GITHUB_REF_NAME" == *-* ]]; then
+            flags+=("--prerelease")
+          fi
+          gh release create "$GITHUB_REF_NAME" "$renamed" \
+            "${flags[@]}" \
+            --notes-file <(echo "$CHANGELOG_BODY"; echo; echo "---"; echo "*HAP 为 debug 构建（未签名），真机安装需要华为 AGC 调试证书；发布说明中的 PR 清单由 GitHub 生成。*")
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG_BODY: ${{ steps.changelog.outputs.body }}

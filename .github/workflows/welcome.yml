@@ -1,0 +1,26 @@
+name: welcome
+
+# pull_request_target 不 checkout PR 代码，仅按事件元数据致意首次贡献者。
+on:
+  pull_request_target:
+    types:
+      - opened
+
+permissions:
+  pull-requests: write
+
+jobs:
+  welcome:
+    name: 欢迎首次贡献者
+    runs-on: ubuntu-latest
+    steps:
+      - name: 首次贡献致意
+        uses: actions/first-interaction@3c71ce730280171fd1cfb57c00c774f8998586f7 # v1
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-message: |
+            欢迎来到 NetBird 移动客户端！🎉 感谢提交第一个 PR。
+
+            CI 会自动跑 harmony 测试、脚本静态检查与提交规范校验，全绿后即可合并。
+            如果Checks 有失败项，点开日志看一眼——大部分是提交信息不符合
+            Conventional Commits，修正说明见 CONTRIBUTING.md。

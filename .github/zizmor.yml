@@ -1,0 +1,9 @@
+# zizmor 豁免清单：每条豁免必须写明可验证的安全依据，禁止无据豁免。
+rules:
+  pull-request-target:
+    ignore:
+      - pr-labeler.yml
+      - welcome.yml
+    # 依据：两个工作流虽用 pull_request_target 触发（以获得只读的 fork
+    # PR 元数据），但都不 checkout PR 代码、不执行 PR 内容，仅以
+    # GITHUB_TOKEN 写标签/评论——任意代码执行的前提不成立。
