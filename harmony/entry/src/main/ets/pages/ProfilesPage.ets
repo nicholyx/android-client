@@ -178,17 +178,55 @@ export struct ProfilesPage {
                     Text($r('app.string.profiles_switch'))
                       .fontSize(14)
                       .fontColor($r('app.color.nb_orange'))
-                      .onClick(() => EngineManager.getInstance().switchProfile(profile.id))
+                      .onClick(() => {
+                        // 三处操作都带确认，对齐 Android ProfilesFragment.createDialog。
+                        AlertDialog.show({
+                          message: $r('app.string.profiles_switch_confirm'),
+                          primaryButton: {
+                            value: $r('app.string.action_cancel'),
+                            action: () => {}
+                          },
+                          secondaryButton: {
+                            value: $r('app.string.profiles_switch'),
+                            action: () => EngineManager.getInstance().switchProfile(profile.id)
+                          }
+                        });
+                      })
                   }
                   Text($r('app.string.profiles_logout'))
                     .fontSize(14)
                     .fontColor($r('app.color.nb_txt_light'))
-                    .onClick(() => EngineManager.getInstance().logoutProfile(profile.id))
+                    .onClick(() => {
+                      AlertDialog.show({
+                        message: $r('app.string.profiles_logout_confirm'),
+                        primaryButton: {
+                          value: $r('app.string.action_cancel'),
+                          action: () => {}
+                        },
+                        secondaryButton: {
+                          value: $r('app.string.profiles_logout'),
+                          action: () => EngineManager.getInstance().logoutProfile(profile.id)
+                        }
+                      });
+                    })
                   if (profile.id !== 'default') {
                     Text($r('app.string.profiles_remove'))
                       .fontSize(14)
                       .fontColor($r('app.color.nb_danger'))
-                      .onClick(() => EngineManager.getInstance().removeProfile(profile.id))
+                      .onClick(() => {
+                        AlertDialog.show({
+                          message: $r('app.string.profiles_remove_confirm'),
+                          primaryButton: {
+                            value: $r('app.string.action_cancel'),
+                            action: () => {}
+                          },
+                          secondaryButton: {
+                            value: $r('app.string.action_delete'),
+                            fontColor: $r('app.color.nb_danger'),
+                            action: () => EngineManager.getInstance().removeProfile(profile.id)
+                          }
+                        });
+                      })
                   }
                 }
                 .width('100%')

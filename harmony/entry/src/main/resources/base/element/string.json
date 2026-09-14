@@ -1,5 +1,11 @@
 {
   "string": [
+    { "name": "action_cancel", "value": "Cancel" },
+    { "name": "action_delete", "value": "Delete" },
+    { "name": "ssh_delete_confirm", "value": "Delete this SSH session?" },
+    { "name": "profiles_switch_confirm", "value": "Switch to this profile? The tunnel will reconnect with the new profile." },
+    { "name": "profiles_logout_confirm", "value": "Log out of this profile? You will need to sign in again." },
+    { "name": "profiles_remove_confirm", "value": "Remove this profile? This cannot be undone." },
     { "name": "module_desc", "value": "NetBird HarmonyOS client entry module" },
     { "name": "entry_ability_desc", "value": "NetBird" },
 

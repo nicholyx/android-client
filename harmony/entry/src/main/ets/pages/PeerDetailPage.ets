@@ -249,10 +249,13 @@ export class SshTarget {
   host: string;
   port: number;
   user: string;
+  /** 关联的 SSH 会话 id；从 peer 详情直连时为空串（无会话记录）。 */
+  sessionId: string;
 
-  constructor(host: string, port: number, user: string) {
+  constructor(host: string, port: number, user: string, sessionId: string = '') {
     this.host = host;
     this.port = port;
     this.user = user;
+    this.sessionId = sessionId;
   }
 }
