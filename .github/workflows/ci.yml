@@ -1,0 +1,105 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# 最小权限：只有提交规范校验需要读历史，其余一律 contents: read。
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  harmony-tests:
+    name: HarmonyOS 静态验证与逻辑测试
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: 运行 harmony 测试套件
+        run: node tools/run-all-tests.mjs
+        working-directory: harmony
+
+  script-lint:
+    name: 脚本静态检查（shellcheck）
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: shellcheck 与 bash -n
+        run: |
+          set -euo pipefail
+          found=0
+          for f in scripts/*.sh; do
+            if [[ ! -e "$f" ]]; then
+              continue
+            fi
+            found=1
+            shellcheck "$f"
+            bash -n "$f"
+          done
+          if [[ $found -eq 0 ]]; then
+            echo "scripts/ 下没有脚本，跳过"
+          fi
+
+  commit-lint:
+    name: 提交规范（Conventional Commits）
+    runs-on: ubuntu-latest
+    # push 到 main 不校验：合入 main 的唯一路径是 PR（分支保护），
+    # 而 PR 里已经校验过标题与区间提交，直接 push main 走不到这里。
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 校验 PR 标题与区间提交
+        # 用户可控的标题经 env 中转进脚本，${{ }} 不直接写进 run:（表达式注入）。
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          base="$(git merge-base "$PR_BASE" "$PR_HEAD")"
+          bash scripts/check-commit-msg.sh --pr-title "$PR_TITLE" --range "${base}..${PR_HEAD}"
+
+  ci-summary:
+    name: CI 总览
+    needs:
+      - harmony-tests
+      - script-lint
+      - commit-lint
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: 汇总各检查结果
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          echo "各检查结果：$RESULTS"
+          if [[ "$RESULTS" == *failure* || "$RESULTS" == *cancelled* ]]; then
+            echo "CI 总览：存在失败项"
+            exit 1
+          fi
+          # commit-lint 在 push main 时被 if 跳过（skipped），不算失败。
+          echo "CI 总览：通过"
