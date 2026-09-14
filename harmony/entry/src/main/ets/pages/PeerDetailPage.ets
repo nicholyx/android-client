@@ -1,5 +1,5 @@
 import { Peer } from '../model/Peer';
-import { PeerStatus, StatusMapper } from '../model/Status';
+import { StatusMapper } from '../model/Status';
 import { Keys } from '../common/Constants';
 import { Formatters } from '../common/Formatters';
 import { StatusDot } from '../components/StatusDot';
@@ -33,11 +33,11 @@ export struct PeerDetailPage {
     }
     const data: pasteboard.PasteData = pasteboard.createData(pasteboard.MIMETYPE_TEXT_PLAIN, text);
     pasteboard.getSystemPasteboard().setData(data);
-    promptAction.showToast({ message: 'Copied to clipboard' });
+    promptAction.showToast({ message: $r('app.string.peer_detail_copied') });
   }
 
   @Builder
-  DetailRow(label: Resource, value: string, mono: boolean, valueColor: ResourceColor, copyable: boolean) {
+  DetailRow(label: Resource, value: string | Resource, mono: boolean, valueColor: ResourceColor, copyable: boolean) {
     Row() {
       Text(label)
         .fontSize(14)
@@ -59,7 +59,7 @@ export struct PeerDetailPage {
     // 逐行复制对齐 Android 详情页的行级交互，不再是整卡只复制 IP。
     .onClick(() => {
       if (copyable) {
-        this.copy(value);
+        this.copy(value as string);
       }
     })
   }
@@ -120,14 +120,14 @@ export struct PeerDetailPage {
             // Connection card
             Column() {
               this.DetailRow($r('app.string.peer_detail_connection'),
-                this.peer()!.relayed ? 'Relayed' : 'P2P', false, $r('app.color.nb_txt'), false)
+                this.peer()!.relayed ? $r('app.string.peer_detail_connection_relayed') : $r('app.string.peer_detail_connection_p2p'), false, $r('app.color.nb_txt'), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_latency'),
                 this.peer()!.latencyMs > 0 ? `${this.peer()!.latencyMs} ms` : '-', false,
                 Formatters.latencyColor(this.peer()!.latencyMs), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_rosenpass'),
-                this.peer()!.rosenpassEnabled ? 'Yes' : 'No', false, $r('app.color.nb_txt'), false)
+                this.peer()!.rosenpassEnabled ? $r('app.string.peer_detail_yes') : $r('app.string.peer_detail_no'), false, $r('app.color.nb_txt'), false)
             }
             .backgroundColor($r('app.color.info_row_bg'))
             .borderRadius(12)
@@ -217,7 +217,7 @@ export struct PeerDetailPage {
         .scrollBar(BarState.Off)
       } else {
         Column() {
-          Text('Peer not found')
+          Text($r('app.string.peer_not_found'))
             .fontSize(15)
             .fontColor($r('app.color.nb_txt_light'))
         }

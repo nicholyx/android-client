@@ -55,9 +55,9 @@ export struct NetworksPage {
       Row() {
         Text() {
           Span(`${this.connectedCount()}`)
-          Span(' of ')
+          Span($r('app.string.count_of'))
           Span(`${this.totalCount()}`)
-          Span(' Resources connected')
+          Span($r('app.string.resources_connected_suffix'))
         }
         .fontSize(16)
         .fontWeight(FontWeight.Bold)

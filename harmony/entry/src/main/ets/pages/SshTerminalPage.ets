@@ -1,5 +1,4 @@
-import { SshSession, SshState } from '../model/SshSession';
-import { EngineManager } from '../engine/EngineManager';
+import { SshSession } from '../model/SshSession';
 import { Keys } from '../common/Constants';
 import { SshTarget } from './PeerDetailPage';
 

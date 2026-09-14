@@ -1,8 +1,9 @@
 import { common } from '@kit.AbilityKit';
+import { promptAction } from '@kit.ArkUI';
 import { ToggleRow, SectionHeader } from '../components/SettingRows';
 import { EngineManager } from '../engine/EngineManager';
 import { AdvancedSettings } from '../model/Settings';
-import { ThemeMode } from '../common/Constants';
+import { ThemeMode, Keys } from '../common/Constants';
 import { ThemeUtil } from '../common/ThemeUtil';
 
 /*
@@ -13,7 +14,7 @@ import { ThemeUtil } from '../common/ThemeUtil';
  */
 @Component
 export struct AdvancedPage {
-  @StorageLink('nb_theme_mode') themeMode: ThemeMode = ThemeMode.SYSTEM;
+  @StorageLink(Keys.THEME_MODE) themeMode: ThemeMode = ThemeMode.SYSTEM;
 
   @State presharedKey: string = '';
   @State rosenpassEnabled: boolean = false;
@@ -31,6 +32,7 @@ export struct AdvancedPage {
   aboutToAppear(): void {
     const s: AdvancedSettings = EngineManager.getInstance().advanced();
     this.presharedKey = s.presharedKey;
+    this.savedPsk = s.presharedKey;
     this.rosenpassEnabled = s.rosenpassEnabled;
     this.rosenpassPermissive = s.rosenpassPermissive;
     this.disableClientRoutes = s.disableClientRoutes;
@@ -44,9 +46,14 @@ export struct AdvancedPage {
     this.traceLog = s.traceLog;
   }
 
+  // 开关类 persist 落的是「已保存」的 PSK：把尚未确认的半输入态写盘，
+  // 会把任意一次开关切换变成对 PSK 的误提交。PSK 只在 onBlur/onSubmit
+  // 时经 persistPsk 显式落盘。
+  private savedPsk: string = '';
+
   private persist(): void {
     const s: AdvancedSettings = new AdvancedSettings();
-    s.presharedKey = this.presharedKey;
+    s.presharedKey = this.savedPsk;
     s.rosenpassEnabled = this.rosenpassEnabled;
     s.rosenpassPermissive = this.rosenpassPermissive;
     s.disableClientRoutes = this.disableClientRoutes;
@@ -59,6 +66,26 @@ export struct AdvancedPage {
     s.forceRelay = this.forceRelay;
     s.traceLog = this.traceLog;
     EngineManager.getInstance().saveAdvanced(s);
+    promptAction.showToast({ message: $r('app.string.advanced_reconnect_hint') });
+  }
+
+  private persistPsk(): void {
+    this.savedPsk = this.presharedKey;
+    const s: AdvancedSettings = new AdvancedSettings();
+    s.presharedKey = this.savedPsk;
+    s.rosenpassEnabled = this.rosenpassEnabled;
+    s.rosenpassPermissive = this.rosenpassPermissive;
+    s.disableClientRoutes = this.disableClientRoutes;
+    s.disableServerRoutes = this.disableServerRoutes;
+    s.disableDns = this.disableDns;
+    s.disableFirewall = this.disableFirewall;
+    s.disableIpv6 = this.disableIpv6;
+    s.allowSsh = this.allowSsh;
+    s.blockInbound = this.blockInbound;
+    s.forceRelay = this.forceRelay;
+    s.traceLog = this.traceLog;
+    EngineManager.getInstance().saveAdvanced(s);
+    promptAction.showToast({ message: $r('app.string.advanced_reconnect_hint') });
   }
 
   @Builder
@@ -107,7 +134,7 @@ export struct AdvancedPage {
               .backgroundColor($r('app.color.nb_orange'))
               .fontColor($r('app.color.white'))
               .margin({ left: 8 })
-              .onClick(() => this.persist())
+              .onClick(() => this.persistPsk())
           }
           .width('100%')
           .padding({ left: 20, right: 20 })
@@ -127,7 +154,13 @@ export struct AdvancedPage {
           ToggleRow({
             title: $r('app.string.advanced_rosenpass_permissive'),
             isOn: $rosenpassPermissive,
-            onToggle: () => this.persist()
+            // 与 rosenpass 联动：主开关关闭时 permissive 不生效，拦截切换。
+            onToggle: () => {
+              if (!this.rosenpassEnabled) {
+                return;
+              }
+              this.persist()
+            }
           })
 
           SectionHeader({ title: $r('app.string.advanced_title_network_security') })

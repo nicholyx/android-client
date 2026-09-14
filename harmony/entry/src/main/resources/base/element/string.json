@@ -6,6 +6,13 @@
     { "name": "profiles_switch_confirm", "value": "Switch to this profile? The tunnel will reconnect with the new profile." },
     { "name": "profiles_logout_confirm", "value": "Log out of this profile? You will need to sign in again." },
     { "name": "profiles_remove_confirm", "value": "Remove this profile? This cannot be undone." },
+    { "name": "count_of", "value": "of" },
+    { "name": "peers_connected_suffix", "value": "Peers connected" },
+    { "name": "resources_connected_suffix", "value": "Resources connected" },
+    { "name": "peer_not_found", "value": "Peer not found" },
+    { "name": "advanced_reconnect_hint", "value": "Reconnect the tunnel to apply this setting" },
+    { "name": "first_install_using", "value": "Using" },
+    { "name": "settings_language_set", "value": "Language set to" },
     { "name": "module_desc", "value": "NetBird HarmonyOS client entry module" },
     { "name": "entry_ability_desc", "value": "NetBird" },
 
