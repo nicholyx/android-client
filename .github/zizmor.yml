@@ -13,3 +13,9 @@ rules:
       - welcome.yml
     # 依据：同上——pull_request_target 本身是危险触发器，但这两个工作流
     # 只按事件元数据打标签/评论，无 checkout、无 fork 代码执行面。
+  cache-poisoning:
+    ignore:
+      - release.yml
+    # 依据：审计对 setup-node/setup-java 按「可能启用内置缓存」启发式告警；
+    # 实际 release.yml 未启用任何缓存（Actions cache 已刻意移除）。本工作流
+    # 仅由 tag 推送触发，tag 推送受分支保护限制，无第三方输入面。
