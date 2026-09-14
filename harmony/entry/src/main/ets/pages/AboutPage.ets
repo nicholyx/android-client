@@ -1,4 +1,4 @@
-import { common } from '@kit.AbilityKit';
+import { bundleManager, common } from '@kit.AbilityKit';
 import { Urls } from '../common/Constants';
 import { UrlOpener } from '../common/UrlOpener';
 
@@ -10,6 +10,21 @@ import { UrlOpener } from '../common/UrlOpener';
 export struct AboutPage {
   private open(url: string): void {
     UrlOpener.open(getContext(this) as common.UIAbilityContext, url);
+  }
+
+  @State versionLabel: string = '';
+
+  aboutToAppear(): void {
+    // 版本号读自应用包信息，不再硬编码。
+    try {
+      const info: bundleManager.BundleInfo =
+        bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
+      const prefix: string =
+        getContext(this).resourceManager.getStringSync($r('app.string.about_version').id);
+      this.versionLabel = `${prefix}${info.versionName}`;
+    } catch (err) {
+      console.error(`[NetBird] read version failed: ${JSON.stringify(err)}`);
+    }
   }
 
   /* 此 SDK（5.0.1）的 NavDestination 标题不接受 Resource，用局部 @Builder 渲染 $r。 */
@@ -31,7 +46,7 @@ export struct AboutPage {
           .fontWeight(FontWeight.Bold)
           .fontColor($r('app.color.nb_txt'))
 
-        Text('Version: 1.0.0')
+        Text(this.versionLabel)
           .fontSize(14)
           .fontColor($r('app.color.nb_txt_light'))
           .margin({ top: 8 })

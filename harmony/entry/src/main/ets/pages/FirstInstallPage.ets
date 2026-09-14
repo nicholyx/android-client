@@ -20,9 +20,13 @@ export struct FirstInstallPage {
     const serverUrl: string = this.isCloud ? Urls.CLOUD_MANAGEMENT : this.url.trim();
     const manager: EngineManager = EngineManager.getInstance();
     // Point the default profile at the chosen server, then dismiss onboarding.
+    // 此前 serverUrl 只进了 toast，自建服务器地址被丢弃。
     manager.switchProfile('default');
+    manager.updateProfileServerUrl('default', serverUrl);
     manager.clearFirstLaunch();
-    promptAction.showToast({ message: `Using ${serverUrl}` });
+        const usingPrefix: string =
+      getContext(this).resourceManager.getStringSync($r('app.string.first_install_using').id);
+    promptAction.showToast({ message: `${usingPrefix} ${serverUrl}` });
   }
 
   build() {

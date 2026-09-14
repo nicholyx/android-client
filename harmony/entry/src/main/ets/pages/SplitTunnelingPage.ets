@@ -1,6 +1,6 @@
 import { EngineManager } from '../engine/EngineManager';
 import { SplitTunnelConfig, SplitTunnelEntry } from '../model/Settings';
-import { SplitTunnelMode } from '../common/Constants';
+import { SplitTunnelMode, Keys } from '../common/Constants';
 
 interface ModeOption {
   mode: SplitTunnelMode;
@@ -17,7 +17,7 @@ interface ModeOption {
  */
 @Component
 export struct SplitTunnelingPage {
-  @StorageLink('nb_split_tunneling') config: SplitTunnelConfig = new SplitTunnelConfig();
+  @StorageLink(Keys.SPLIT_TUNNELING) config: SplitTunnelConfig = new SplitTunnelConfig();
   @State query: string = '';
 
   private modes: ModeOption[] = [

@@ -1,7 +1,8 @@
-import { common } from '@kit.AbilityKit';
+import { bundleManager, common } from '@kit.AbilityKit';
 import { i18n } from '@kit.LocalizationKit';
 import { promptAction } from '@kit.ArkUI';
 import { SectionHeader, NavRow } from '../components/SettingRows';
+import { Keys } from '../common/Constants';
 import { EngineManager } from '../engine/EngineManager';
 import { Urls } from '../common/Constants';
 import { UrlOpener } from '../common/UrlOpener';
@@ -21,8 +22,8 @@ interface LanguageOption {
  */
 @Component
 export struct SettingsPage {
-  @StorageLink('nb_active_profile_id') activeProfileId: string = '';
-  @StorageLink('nb_profiles') profiles: Profile[] = [];
+  @StorageLink(Keys.ACTIVE_PROFILE_ID) activeProfileId: string = '';
+  @StorageLink(Keys.PROFILES) profiles: Profile[] = [];
   @State languageSheet: boolean = false;
   @State currentLanguage: string = 'System default';
 
@@ -80,9 +81,24 @@ export struct SettingsPage {
     this.currentLanguage = lang.label;
     try {
       i18n.System.setAppPreferredLanguage(lang.code);
-      promptAction.showToast({ message: `Language set to ${lang.label}` });
+            const langPrefix: string =
+        getContext(this).resourceManager.getStringSync($r('app.string.settings_language_set').id);
+      promptAction.showToast({ message: `${langPrefix} ${lang.label}` });
     } catch (err) {
       console.error(`[NetBird] setAppPreferredLanguage failed: ${JSON.stringify(err)}`);
+    }
+  }
+
+  private versionLabel(): string {
+    try {
+      const info: bundleManager.BundleInfo =
+        bundleManager.getBundleInfoForSelfSync(bundleManager.BundleFlag.GET_BUNDLE_INFO_DEFAULT);
+      const prefix: string =
+        getContext(this).resourceManager.getStringSync($r('app.string.about_version').id);
+      return `${prefix}${info.versionName}`;
+    } catch (err) {
+      console.error(`[NetBird] read version failed: ${JSON.stringify(err)}`);
+      return '';
     }
   }
 
@@ -93,6 +109,12 @@ export struct SettingsPage {
         NavRow({
           title: $r('app.string.menu_profiles'),
           subtitle: this.activeProfileName(),
+          onTap: () => AppNav.push(Routes.PROFILES)
+        })
+        // Android 的 Change Server 打开服务器选择；harmony 侧该能力由
+        // Profiles / FirstInstall 承担，真实管理面切换随登录体系（#12）落地。
+        NavRow({
+          title: $r('app.string.menu_change_server'),
           onTap: () => AppNav.push(Routes.PROFILES)
         })
 
@@ -118,7 +140,7 @@ export struct SettingsPage {
           onTap: () => UrlOpener.open(getContext(this) as common.UIAbilityContext, Urls.DOCS)
         })
 
-        Text('Version: 1.0.0')
+        Text(this.versionLabel())
           .fontSize(13)
           .fontColor($r('app.color.nb_txt_light'))
           .width('100%')

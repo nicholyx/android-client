@@ -196,6 +196,17 @@ export class EngineManager implements EngineObserver {
     }
   }
 
+  /** 把自建服务器地址写进 profile（FirstInstall 引导页选择后调用）。 */
+  updateProfileServerUrl(id: string, serverUrl: string): void {
+    const profiles: Profile[] = (AppStorage.get<Profile[]>(Keys.PROFILES) ?? []).slice();
+    profiles.forEach((p: Profile) => {
+      if (p.id === id) {
+        p.serverUrl = serverUrl;
+      }
+    });
+    AppStorage.set<Profile[]>(Keys.PROFILES, profiles);
+  }
+
   logoutProfile(id: string): void {
     const profiles: Profile[] = (AppStorage.get<Profile[]>(Keys.PROFILES) ?? []).slice();
     profiles.forEach((p: Profile) => {

@@ -290,6 +290,22 @@ else fail('EngineManager must implement EngineObserver');
 if (/new MockVpnEngine\(\)/.test(mgr)) ok('EngineManager injects MockVpnEngine (documented swap point)');
 else warn('EngineManager engine injection point changed');
 
+// ============================ 9. string key coverage ============================
+section('[9/9] String resource coverage (advisory)');
+const jsonFiles = [...walk(path.join(ROOT, 'entry/src/main/resources'))]
+  .filter(f => f.endsWith('string.json'));
+const defined = new Set();
+for (const jf of jsonFiles) {
+  try { for (const m of src.get(jf) ? src.get(jf).matchAll(/"name":\s*"([a-z0-9_]+)"/g) : []) defined.add(m[1]); } catch {}
+}
+const referenced = new Set();
+for (const [f, content] of src) {
+  for (const m of content.matchAll(/app\.string\.([a-z0-9_]+)/g)) referenced.add(m[1]);
+}
+const unused = [...defined].filter(k => !referenced.has(k));
+if (unused.length === 0) ok('all string keys are referenced');
+else warn(`unused string keys (${unused.length}, cleanup candidates, not a failure): ${unused.slice(0, 12).join(', ')}${unused.length > 12 ? ', ...' : ''}`);
+
 // ---- summary ----
 console.log(`\n${'='.repeat(56)}`);
 console.log(`\x1b[32mPASS: ${pass}\x1b[0m   \x1b[31mFAIL: ${failures.length}\x1b[0m   \x1b[33mWARN: ${warnings.length}\x1b[0m`);

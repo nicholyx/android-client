@@ -293,7 +293,7 @@ export struct HomePage {
           EngineManager.getInstance().extendSession();
           const after: number = AppStorage.get<number>(Keys.SESSION_EXPIRES) ?? 0;
           if (after > before) {
-            promptAction.showToast({ message: 'Session extended' });
+            promptAction.showToast({ message: $r('app.string.session_extended') });
           }
         })
       }
@@ -346,11 +346,11 @@ export struct HomePage {
     .backgroundColor($r('app.color.nb_bg_home'))
   }
 
-  private exitNodeStatus(): string {
+  private exitNodeStatus(): string | Resource {
     const selected: NetResource | null = this.selectedExitNode();
     if (selected !== null) {
       return selected.name;
     }
-    return this.exitNodes().length > 0 ? 'None selected' : 'No exit nodes available';
+    return this.exitNodes().length > 0 ? $r('app.string.exit_node_none') : $r('app.string.exit_node_unavailable');
   }
 }
