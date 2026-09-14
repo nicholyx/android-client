@@ -82,3 +82,6 @@ app/src/main/res/drawable-*/src_*
 app/src/main/res/drawable-*/node_modules_*
 google-services.json
 lefthook.yml
+
+# HarmonyOS hvigor 本地缓存（误入库清理，见 #26）
+.hvigor/
