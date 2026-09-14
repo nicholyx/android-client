@@ -1,0 +1,99 @@
+name: harmony build
+
+on:
+  pull_request:
+    paths:
+      - "harmony/**"
+      - ".github/workflows/harmony-build.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "harmony/**"
+      - ".github/workflows/harmony-build.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: harmony-build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # 与 harmony/build-profile.json5 的 compileSdkVersion 5.0.0(12) 匹配的
+  # commandline-tools 版本。升级时同步更新缓存 key 与下载文件名。
+  CT_VERSION: "5.0.5.200"
+
+jobs:
+  build-hap:
+    name: 构建 HarmonyOS HAP
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+
+      - name: Cache commandline-tools
+        id: ct-cache
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/command-line-tools
+          key: commandline-tools-linux-x64-${{ env.CT_VERSION }}
+
+      - name: Download commandline-tools
+        if: steps.ct-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          url="https://huggingface.co/csukuangfj/harmonyos-commandline-tools/resolve/main/commandline-tools-linux-x64-${CT_VERSION}.zip"
+          curl -sSL --retry 3 -o /tmp/ct.zip "$url"
+          sha256sum /tmp/ct.zip | tee /tmp/ct.sha256
+          unzip -q /tmp/ct.zip -d ~/ct-extract
+          # 包内顶层目录是 command-line-tools/
+          mv ~/ct-extract/command-line-tools ~/command-line-tools
+          rm -rf /tmp/ct.zip ~/ct-extract
+        env:
+          CT_VERSION: ${{ env.CT_VERSION }}
+
+      - name: Install dependencies (ohpm)
+        working-directory: harmony
+        run: |
+          set -euo pipefail
+          export DEVECO_SDK_HOME="$HOME/command-line-tools/sdk"
+          export PATH="$HOME/command-line-tools/bin:$PATH"
+          hvigorw --version
+          ohpm install --all
+
+      - name: Build HAP (debug)
+        working-directory: harmony
+        run: |
+          set -euo pipefail
+          export DEVECO_SDK_HOME="$HOME/command-line-tools/sdk"
+          export PATH="$HOME/command-line-tools/bin:$PATH"
+          hvigorw assembleHap --mode module -p product=default -p buildMode=debug --no-daemon
+
+      - name: Collect HAP
+        id: collect
+        run: |
+          set -euo pipefail
+          find harmony/entry/build -name "*.hap" -exec ls -lh {} \;
+          echo "hap_dir=harmony/entry/build/default/outputs/default" >> "$GITHUB_OUTPUT"
+
+      - name: Upload HAP artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: harmony-hap-debug
+          path: ${{ steps.collect.outputs.hap_dir }}/*.hap
+          if-no-files-found: error
