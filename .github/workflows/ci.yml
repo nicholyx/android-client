@@ -98,7 +98,7 @@ jobs:
           # 只扫描本仓库维护的工作流；上游继承的 build-*.yml 不纳入基线
           # （其 action 未 pin SHA，随上游同步漂移，强行纳入会把上游变更
           # 变成我们的红灯）。豁免集中在 .github/zizmor.yml。
-          zizmor --no-online-audits --strict \
+          zizmor --no-online-audits --strict-collection \
             .github/workflows/ci.yml \
             .github/workflows/harmony-build.yml \
             .github/workflows/pr-labeler.yml \
