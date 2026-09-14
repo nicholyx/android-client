@@ -53,9 +53,10 @@ export struct ResourceListItem {
           .selectedColor($r('app.color.nb_orange'))
           .onChange((value: boolean) => this.onToggle(this.resource, value))
       } else {
-        SymbolGlyph($r('sys.symbol.chevron_right'))
-          .fontSize(16)
-          .fontColor([$r('app.color.nb_txt_light')])
+        // Exit node 行没有子页面可进：不渲染死的 chevron。
+        Text(('app.string.exit_node_title'))
+          .fontSize(12)
+          .fontColor($r('app.color.nb_txt_light'))
       }
     }
     .width('100%')

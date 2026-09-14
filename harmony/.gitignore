@@ -1,10 +1,10 @@
 # HarmonyOS / DevEco Studio 构建产物
 /node_modules
-/oh_modules
+oh_modules/
 /local.properties
 /.idea
 **/build
-/.hvigor
+.hvigor/
 .cxx
 /.clangd
 /.clang-format

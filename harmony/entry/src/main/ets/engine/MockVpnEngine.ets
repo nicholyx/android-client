@@ -2,7 +2,7 @@ import { VpnEngine } from './VpnEngine';
 import { EngineObserver } from './EngineEvents';
 import { Peer } from '../model/Peer';
 import { PeerStatus, StatusMapper } from '../model/Status';
-import { Resource, NetworkDomain } from '../model/Resource';
+import { Resource, NetworkDomain, RoutingPeer } from '../model/Resource';
 import { ConnectionState } from '../model/ConnectionState';
 
 /*
@@ -243,8 +243,15 @@ export class MockVpnEngine implements VpnEngine {
 
   private notifyResources(): void {
     if (this.observer !== null) {
-      this.observer.onResourcesChanged(this.resourceSet.slice(), []);
+      this.observer.onResourcesChanged(this.resourceSet.slice(), this.routingPeers());
     }
+  }
+
+  /** 按真实引擎的语义，把带路由的已连接 peer 汇总为路由归属表。 */
+  private routingPeers(): RoutingPeer[] {
+    return this.peerSet
+      .filter((p: Peer): boolean => p.status === PeerStatus.CONNECTED && p.routes.length > 0)
+      .map((p: Peer): RoutingPeer => new RoutingPeer(p.status, p.routes.slice()));
   }
 
   private notifySession(): void {

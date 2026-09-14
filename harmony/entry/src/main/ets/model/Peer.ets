@@ -62,3 +62,24 @@ export class Peer {
     return this.ip.length > 0 ? this.ip : '—';
   }
 }
+
+/** 列表排序：已连接优先，其余按显示名（FQDN 优先，回落 IP），对齐 Android PeersAdapter。 */
+export class PeerSort {
+  static compare(p1: Peer, p2: Peer): number {
+    const c1: boolean = p1.status === PeerStatus.CONNECTED;
+    const c2: boolean = p2.status === PeerStatus.CONNECTED;
+    if (c1 !== c2) {
+      return c1 ? -1 : 1;
+    }
+    const n1: string = p1.displayName().toLowerCase();
+    const n2: string = p2.displayName().toLowerCase();
+    if (n1 < n2) {
+      return -1;
+    }
+    if (n1 > n2) {
+      return 1;
+    }
+    return 0;
+  }
+}
+

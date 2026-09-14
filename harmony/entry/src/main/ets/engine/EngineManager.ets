@@ -93,6 +93,8 @@ export class EngineManager implements EngineObserver {
 
   onResourcesChanged(resources: Resource[], routingPeers: RoutingPeer[]): void {
     AppStorage.set<Resource[]>(Keys.RESOURCES, resources);
+    // 路由 peer 状态供 Resources 页展示（此前参数被忽略）。
+    AppStorage.set<RoutingPeer[]>(Keys.ROUTING_PEERS, routingPeers.slice());
   }
 
   onSessionDeadlineChanged(expiresAtUnixSeconds: number): void {
