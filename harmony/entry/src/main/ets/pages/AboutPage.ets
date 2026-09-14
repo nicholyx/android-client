@@ -12,6 +12,15 @@ export struct AboutPage {
     UrlOpener.open(getContext(this) as common.UIAbilityContext, url);
   }
 
+  /* 此 SDK（5.0.1）的 NavDestination 标题不接受 Resource，用局部 @Builder 渲染 $r。 */
+  @Builder
+  DestTitle() {
+    Text($r('app.string.menu_about'))
+      .fontSize(20)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('app.color.nb_txt'))
+  }
+
   build() {
     NavDestination() {
       Column() {
@@ -54,7 +63,7 @@ export struct AboutPage {
       .height('100%')
       .alignItems(HorizontalAlign.Center)
     }
-    .title($r('app.string.menu_about'))
+    .title({ builder: this.DestTitle, height: TitleHeight.MainOnly })
     .backgroundColor($r('app.color.nb_bg'))
   }
 }

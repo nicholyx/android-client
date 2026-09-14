@@ -3,7 +3,7 @@ import { PeerStatus, StatusMapper } from '../model/Status';
 import { Keys } from '../common/Constants';
 import { Formatters } from '../common/Formatters';
 import { StatusDot } from '../components/StatusDot';
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 import { promptAction } from '@kit.ArkUI';
 import { pasteboard } from '@kit.BasicServicesKit';
 
@@ -58,6 +58,16 @@ export struct PeerDetailPage {
     .alignItems(VerticalAlign.Center)
   }
 
+  /* 本 SDK（5.0.1）的 NavDestination.title 不接受 Resource，用局部 @Builder
+   * 渲染 $r 并显式给出 CustomTitle 必需的 height（此版 SDK 为必填字段）。 */
+  @Builder
+  DestTitle() {
+    Text($r('app.string.peer_detail_title'))
+      .fontSize(20)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('app.color.nb_txt'))
+  }
+
   build() {
     NavDestination() {
       if (this.peer() !== null) {
@@ -65,7 +75,7 @@ export struct PeerDetailPage {
           Column() {
             // Header
             Row() {
-              StatusDot({ status: this.peer()!.status, size: 10 })
+              StatusDot({ status: this.peer()!.status, dotSize: 10 })
               Column() {
                 Text(this.peer()!.displayName())
                   .fontSize(18)
@@ -191,7 +201,7 @@ export struct PeerDetailPage {
               .onClick(() => {
                 const p: Peer | null = this.peer();
                 if (p !== null) {
-                  NavRouter.push(Routes.SSH_TERMINAL, new SshTarget(p.ip, 22, 'root'));
+                  AppNav.push(Routes.SSH_TERMINAL, new SshTarget(p.ip, 22, 'root'));
                 }
               })
           }
@@ -211,10 +221,10 @@ export struct PeerDetailPage {
         .justifyContent(FlexAlign.Center)
       }
     }
-    .title($r('app.string.peer_detail_title'))
+    .title({ builder: this.DestTitle, height: TitleHeight.MainOnly })
     .backgroundColor($r('app.color.nb_bg'))
     .onReady((ctx: NavDestinationContext) => {
-      const param: Object | undefined = ctx.pathInfo.param;
+      const param = ctx.pathInfo.param as Object | undefined;
       if (typeof param === 'string') {
         this.peerIp = param as string;
       }

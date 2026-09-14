@@ -1,4 +1,4 @@
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 import { Keys } from '../common/Constants';
 import { EngineManager } from '../engine/EngineManager';
 
@@ -46,7 +46,7 @@ struct Index {
   ];
 
   aboutToAppear(): void {
-    NavRouter.bind(this.navStack);
+    AppNav.bind(this.navStack);
     EngineManager.getInstance().init();
   }
 

@@ -2,7 +2,7 @@ import { Peer } from '../model/Peer';
 import { PeerStatus } from '../model/Status';
 import { Keys, Urls } from '../common/Constants';
 import { PeerListItem } from '../components/PeerListItem';
-import { Routes, NavRouter } from '../common/NavRouter';
+import { Routes, AppNav } from '../common/NavRouter';
 import { UrlOpener } from '../common/UrlOpener';
 import { common } from '@kit.AbilityKit';
 
@@ -117,7 +117,7 @@ export struct PeersPage {
             ListItem() {
               PeerListItem({
                 peer: peer,
-                onTap: (p: Peer) => NavRouter.push(Routes.PEER_DETAIL, p.ip)
+                onTap: (p: Peer) => AppNav.push(Routes.PEER_DETAIL, p.ip)
               })
             }
           }, (peer: Peer) => peer.ip + peer.fqdn)

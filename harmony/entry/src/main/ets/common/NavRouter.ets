@@ -14,30 +14,30 @@ export class Routes {
   static readonly SSH_TERMINAL: string = 'SshTerminal';
 }
 
-export class NavRouter {
+export class AppNav {
   private static stack: NavPathStack | null = null;
 
   static bind(stack: NavPathStack): void {
-    NavRouter.stack = stack;
+    AppNav.stack = stack;
   }
 
   static push(name: string, param?: Object): void {
-    if (NavRouter.stack !== null) {
-      NavRouter.stack.pushPathByName(name, param);
+    if (AppNav.stack !== null) {
+      AppNav.stack.pushPathByName(name, param);
     }
   }
 
   static pop(): void {
-    if (NavRouter.stack !== null) {
-      NavRouter.stack.pop();
+    if (AppNav.stack !== null) {
+      AppNav.stack.pop();
     }
   }
 
   /** Replace the whole stack, used to jump to first-run onboarding. */
   static reset(name: string): void {
-    if (NavRouter.stack !== null) {
-      NavRouter.stack.clear();
-      NavRouter.stack.pushPathByName(name, undefined);
+    if (AppNav.stack !== null) {
+      AppNav.stack.clear();
+      AppNav.stack.pushPathByName(name, undefined);
     }
   }
 }

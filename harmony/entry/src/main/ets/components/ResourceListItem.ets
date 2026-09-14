@@ -14,7 +14,7 @@ export struct ResourceListItem {
 
   build() {
     Row() {
-      StatusDot({ status: this.resource.status, size: 9 })
+      StatusDot({ status: this.resource.status, dotSize: 9 })
 
       Column() {
         Row() {

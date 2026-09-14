@@ -17,6 +17,10 @@ import { Keys, SplitTunnelMode } from './common/Constants.mts';
 import { MockVpnEngine } from './engine/MockVpnEngine.mts';
 import { EngineManager } from './engine/EngineManager.mts';
 
+async function sleep(ms) {
+  await new Promise((r) => setTimeout(r, ms));
+}
+
 async function waitFor(pred, timeout = 5000) {
   const t0 = Date.now();
   while (Date.now() - t0 < timeout) {
@@ -41,11 +45,13 @@ test('Formatters.latencyColor bands by latency', () => {
   assert.equal(Formatters.latencyColor(400), 'app.color.nb_danger');
 });
 
-test('Formatters.sessionCountdown matches Android plurals', () => {
+test('Formatters.sessionCountdown matches Android plurals (ceil)', () => {
   const now = Math.floor(Date.now() / 1000);
   assert.equal(Formatters.sessionCountdown(0), '');
   assert.equal(Formatters.sessionCountdown(now - 10), 'Session expired');
-  assert.equal(Formatters.sessionCountdown(now + 30), 'Session expires in less than a minute');
+  // ceil：不足一分钟的余量也要算作一分钟（对齐 Android formatSessionExpiry）
+  assert.equal(Formatters.sessionCountdown(now + 30), 'Session expires in 1 minute');
+  assert.equal(Formatters.sessionCountdown(now + 61), 'Session expires in 2 minutes');
   assert.equal(Formatters.sessionCountdown(now + 5 * 60), 'Session expires in 5 minutes');
   assert.equal(Formatters.sessionCountdown(now + 60 * 60), 'Session expires in 1 hour');
   assert.equal(Formatters.sessionCountdown(now + 3 * 24 * 3600), 'Session expires in 3 days');
@@ -170,6 +176,33 @@ test('MockVpnEngine full connect/stop lifecycle', async () => {
     'reaches DISCONNECTED and clears peers');
   assert.equal(eng.isRunning(), false);
   assert.equal(eng.peers().length, 0, 'peers cleared on stop');
+});
+
+test('MockVpnEngine rapid stop/run race clears the pending teardown', async () => {
+  // 回归：stop() 的 900ms 延迟 teardown 未记录句柄时，teardown 期间重新 run()
+  // 会被旧回调清空 peers 并 emit DISCONNECTED，最终状态卡在断开。
+  const eng = new MockVpnEngine();
+  const states = [];
+  eng.setObserver({
+    onStateChanged: (s) => states.push(s),
+    onAddressChanged: () => {},
+    onPeersChanged: () => {},
+    onResourcesChanged: () => {},
+    onSessionDeadlineChanged: () => {},
+    onSessionExpired: () => {},
+    onError: () => {},
+  });
+
+  eng.run(false);
+  assert.ok(await waitFor(() => states.includes(ConnectionState.CONNECTED)), 'first connect');
+  eng.stop();
+  eng.run(false); // teardown 仍在途时立即重连
+  assert.ok(await waitFor(() => states[states.length - 1] === ConnectionState.CONNECTED), 'reconnects');
+  await sleep(1100); // 越过旧 teardown 的 900ms 触发点
+  assert.equal(states[states.length - 1], ConnectionState.CONNECTED, 'stays CONNECTED after teardown window');
+  assert.ok(eng.peers().length > 0, 'peers survive the stale teardown');
+  assert.equal(eng.isRunning(), true);
+  eng.stop();
 });
 
 // ----------------------------- EngineManager -----------------------------

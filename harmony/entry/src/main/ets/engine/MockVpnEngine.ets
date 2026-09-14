@@ -20,6 +20,9 @@ export class MockVpnEngine implements VpnEngine {
   private running: boolean = false;
   private connectTimer: number = -1;
   private tickTimer: number = -1;
+  // stop() 的延迟 teardown 句柄：不记录的话，teardown 期间重新 run() 会被旧
+  // 回调清空状态并 emit DISCONNECTED（快速断开/重连的状态机竞态）。
+  private teardownTimer: number = -1;
   private currentState: ConnectionState = ConnectionState.DISCONNECTED;
   private sessionDeadline: number = 0;
   private peerSet: Peer[] = [];
@@ -71,6 +74,8 @@ export class MockVpnEngine implements VpnEngine {
     if (this.running) {
       return;
     }
+    // 清掉尚未执行的 stop() teardown，避免它在本轮连接建立后清空状态。
+    this.clearTimers();
     this.running = true;
     this.buildDataset();
     this.emitState(ConnectionState.CONNECTING);
@@ -94,7 +99,11 @@ export class MockVpnEngine implements VpnEngine {
     this.running = false;
     this.clearTimers();
     this.emitState(ConnectionState.DISCONNECTING);
-    setTimeout(() => {
+    this.teardownTimer = setTimeout(() => {
+      this.teardownTimer = -1;
+      if (this.running) {
+        return; // teardown 期间又被 run() 了：本轮 teardown 作废
+      }
       this.sessionDeadline = 0;
       this.peerSet = [];
       this.resourceSet = [];
@@ -206,6 +215,10 @@ export class MockVpnEngine implements VpnEngine {
     if (this.tickTimer !== -1) {
       clearInterval(this.tickTimer);
       this.tickTimer = -1;
+    }
+    if (this.teardownTimer !== -1) {
+      clearTimeout(this.teardownTimer);
+      this.teardownTimer = -1;
     }
   }
 

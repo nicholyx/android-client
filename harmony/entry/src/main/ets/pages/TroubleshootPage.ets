@@ -28,6 +28,16 @@ export struct TroubleshootPage {
     promptAction.showToast({ message: 'Debug bundle key copied to clipboard' });
   }
 
+  /* 本 SDK（5.0.1）的 NavDestination.title 不接受 Resource，用局部 @Builder
+   * 渲染 $r 并显式给出 CustomTitle 必需的 height（此版 SDK 为必填字段）。 */
+  @Builder
+  DestTitle() {
+    Text($r('app.string.menu_troubleshoot'))
+      .fontSize(20)
+      .fontWeight(FontWeight.Bold)
+      .fontColor($r('app.color.nb_txt'))
+  }
+
   build() {
     NavDestination() {
       Scroll() {
@@ -77,7 +87,7 @@ export struct TroubleshootPage {
       .height('100%')
       .scrollBar(BarState.Off)
     }
-    .title($r('app.string.menu_troubleshoot'))
+    .title({ builder: this.DestTitle, height: TitleHeight.MainOnly })
     .backgroundColor($r('app.color.nb_bg'))
   }
 }

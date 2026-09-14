@@ -15,7 +15,7 @@ export struct PeerListItem {
 
   build() {
     Row() {
-      StatusDot({ status: this.peer.status, size: 9 })
+      StatusDot({ status: this.peer.status, dotSize: 9 })
 
       Column() {
         Text(this.peer.displayName())

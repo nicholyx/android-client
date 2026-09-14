@@ -48,7 +48,9 @@ export class Formatters {
     if (delta <= 0) {
       return 'Session expired';
     }
-    const minutes: number = Math.floor(delta / 60);
+    // 向上取整对齐 Android HomeFragment.formatSessionExpiry：剩余 30 秒要
+    // 显示「1 minute」，floor 会显示不足一分钟而掩盖即将到期的紧迫性。
+    const minutes: number = Math.ceil(delta / 60);
     if (minutes < 1) {
       return 'Session expires in less than a minute';
     }
