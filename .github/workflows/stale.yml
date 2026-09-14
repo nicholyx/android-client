@@ -1,0 +1,31 @@
+name: stale
+
+on:
+  schedule:
+    # 每天一次；分钟避开整点，降低与全网定时任务的挤兑。
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    name: 标记与关闭不活跃 Issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stale
+        uses: actions/stale@5bef64f19d7facfb25b37b414482c7164d639639 # v9
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          days-before-stale: 60
+          days-before-close: 14
+          stale-issue-message: "这个 Issue 60 天没有动静了。如果问题仍然存在请回复说明，否则 14 天后会自动关闭。"
+          stale-pr-message: "这个 PR 60 天没有更新了。如果仍在进行请 rebase 并回复，否则 14 天后会自动关闭。"
+          close-issue-message: "因长期无响应自动关闭；问题仍存在时欢迎重新打开并补充信息。"
+          exempt-issue-labels: "security,pinned,good first issue,help wanted"
+          exempt-pr-labels: "security,pinned"
+          stale-issue-label: "stale"
+          stale-pr-label: "stale"
+          operations-per-run: 100
