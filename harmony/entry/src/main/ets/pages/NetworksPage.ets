@@ -17,7 +17,7 @@ export struct NetworksPage {
 
   private nonExitNodes(): NetResource[] {
     const q: string = this.query.trim().toLowerCase();
-    return this.resources.filter((r: NetResource): boolean => {
+    const result = this.resources.filter((r: NetResource): boolean => {
       if (r.isExitNode()) {
         return false;
       }
@@ -26,6 +26,19 @@ export struct NetworksPage {
       }
       return r.name.toLowerCase().includes(q) || r.address.toLowerCase().includes(q);
     });
+    // 对齐 Android NetworksAdapter.sort：按名称排序
+    result.sort((r1: NetResource, r2: NetResource): number => {
+      const n1: string = r1.name.toLowerCase();
+      const n2: string = r2.name.toLowerCase();
+      if (n1 < n2) {
+        return -1;
+      }
+      if (n1 > n2) {
+        return 1;
+      }
+      return 0;
+    });
+    return result;
   }
 
   private connectedCount(): number {

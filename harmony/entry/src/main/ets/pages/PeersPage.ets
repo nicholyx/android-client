@@ -1,4 +1,4 @@
-import { Peer } from '../model/Peer';
+import { Peer, PeerSort } from '../model/Peer';
 import { PeerStatus } from '../model/Status';
 import { Keys, Urls } from '../common/Constants';
 import { PeerListItem } from '../components/PeerListItem';
@@ -30,7 +30,7 @@ export struct PeersPage {
 
   private filtered(): Peer[] {
     const q: string = this.query.trim().toLowerCase();
-    return this.peers.filter((p: Peer): boolean => {
+    const result = this.peers.filter((p: Peer): boolean => {
       if (this.filter !== PeerFilter.ALL && p.status !== this.filter.toString()) {
         return false;
       }
@@ -39,6 +39,10 @@ export struct PeersPage {
       }
       return p.displayName().toLowerCase().includes(q) || p.ip.toLowerCase().includes(q);
     });
+    // 对齐 Android PeersAdapter.sortPeers：已连接优先，其余按显示名排序
+    // （Android 用 fqdn；harmony 的显示名在无 FQDN 时回落到 IP）。
+    result.sort(PeerSort.compare);
+    return result;
   }
 
   @Builder

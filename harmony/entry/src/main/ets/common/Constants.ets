@@ -7,6 +7,7 @@ export class Keys {
   static readonly CONNECTION_STATE: string = 'nb_connection_state';
   static readonly PEERS: string = 'nb_peers';
   static readonly RESOURCES: string = 'nb_resources';
+  static readonly ROUTING_PEERS: string = 'nb_routing_peers';
   static readonly FQDN: string = 'nb_fqdn';
   static readonly IP: string = 'nb_ip';
   static readonly IPV6: string = 'nb_ipv6';

@@ -9,7 +9,7 @@ import { Formatters } from './common/Formatters.mts';
 import { StatusMapper, PeerStatus, ZERO_TIME } from './model/Status.mts';
 import { ConnectionState, ConnectionStateMapper } from './model/ConnectionState.mts';
 import { Resource, NetworkDomain } from './model/Resource.mts';
-import { Peer } from './model/Peer.mts';
+import { Peer, PeerSort } from './model/Peer.mts';
 import { Profile } from './model/Profile.mts';
 import { SshSession, SshState } from './model/SshSession.mts';
 import { AdvancedSettings } from './model/Settings.mts';
@@ -203,6 +203,19 @@ test('MockVpnEngine rapid stop/run race clears the pending teardown', async () =
   assert.ok(eng.peers().length > 0, 'peers survive the stale teardown');
   assert.equal(eng.isRunning(), true);
   eng.stop();
+});
+
+test('PeerSort: connected first then display name', () => {
+  // 对齐 Android PeersAdapter.sortPeers 的排序语义（生产函数 PeerSort.compare）
+  const peers = [
+    new Peer(PeerStatus.IDLE, '100.72.1.5', '', 'zeta.netbird.cloud', '', '', 0, 0, 0, '', false, false, '', '', '', '', '', []),
+    new Peer(PeerStatus.CONNECTED, '100.72.1.2', '', 'mid.netbird.cloud', '', '', 0, 0, 0, '', false, false, '', '', '', '', '', []),
+    new Peer(PeerStatus.CONNECTED, '100.72.1.3', '', 'alpha.netbird.cloud', '', '', 0, 0, 0, '', false, false, '', '', '', '', '', []),
+    new Peer(PeerStatus.IDLE, '100.72.1.4', '', '', '', '', 0, 0, 0, '', false, false, '', '', '', '', '', []),
+  ];
+  peers.sort(PeerSort.compare);
+  assert.deepEqual(peers.map((p) => p.displayName()),
+    ['alpha.netbird.cloud', 'mid.netbird.cloud', '100.72.1.4', 'zeta.netbird.cloud']);
 });
 
 // ----------------------------- EngineManager -----------------------------

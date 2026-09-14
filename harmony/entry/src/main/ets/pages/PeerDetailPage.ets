@@ -37,7 +37,7 @@ export struct PeerDetailPage {
   }
 
   @Builder
-  DetailRow(label: Resource, value: string, mono: boolean, valueColor: ResourceColor) {
+  DetailRow(label: Resource, value: string, mono: boolean, valueColor: ResourceColor, copyable: boolean) {
     Row() {
       Text(label)
         .fontSize(14)
@@ -56,6 +56,12 @@ export struct PeerDetailPage {
     .constraintSize({ minHeight: 48 })
     .padding({ left: 20, right: 20, top: 8, bottom: 8 })
     .alignItems(VerticalAlign.Center)
+    // 逐行复制对齐 Android 详情页的行级交互，不再是整卡只复制 IP。
+    .onClick(() => {
+      if (copyable) {
+        this.copy(value);
+      }
+    })
   }
 
   /* 本 SDK（5.0.1）的 NavDestination.title 不接受 Resource，用局部 @Builder
@@ -98,31 +104,30 @@ export struct PeerDetailPage {
 
             // Address card
             Column() {
-              this.DetailRow($r('app.string.peer_detail_netbird_ip'), this.peer()!.ip, true, $r('app.color.nb_txt'))
+              this.DetailRow($r('app.string.peer_detail_netbird_ip'), this.peer()!.ip, true, $r('app.color.nb_txt'), true)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_netbird_ipv6'),
-                this.peer()!.ipv6.length > 0 ? this.peer()!.ipv6 : '-', true, $r('app.color.nb_txt'))
+                this.peer()!.ipv6.length > 0 ? this.peer()!.ipv6 : '-', true, $r('app.color.nb_txt'), true)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_public_key'),
-                this.peer()!.pubKey, true, $r('app.color.nb_txt'))
+                this.peer()!.pubKey, true, $r('app.color.nb_txt'), true)
             }
             .backgroundColor($r('app.color.info_row_bg'))
             .borderRadius(12)
             .border({ width: 1, color: $r('app.color.info_row_stroke') })
             .margin({ left: 20, right: 20, top: 4 })
-            .onClick(() => this.copy(this.peer()!.ip))
 
             // Connection card
             Column() {
               this.DetailRow($r('app.string.peer_detail_connection'),
-                this.peer()!.relayed ? 'Relayed' : 'P2P', false, $r('app.color.nb_txt'))
+                this.peer()!.relayed ? 'Relayed' : 'P2P', false, $r('app.color.nb_txt'), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_latency'),
                 this.peer()!.latencyMs > 0 ? `${this.peer()!.latencyMs} ms` : '-', false,
-                Formatters.latencyColor(this.peer()!.latencyMs))
+                Formatters.latencyColor(this.peer()!.latencyMs), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_rosenpass'),
-                this.peer()!.rosenpassEnabled ? 'Yes' : 'No', false, $r('app.color.nb_txt'))
+                this.peer()!.rosenpassEnabled ? 'Yes' : 'No', false, $r('app.color.nb_txt'), false)
             }
             .backgroundColor($r('app.color.info_row_bg'))
             .borderRadius(12)
@@ -132,13 +137,13 @@ export struct PeerDetailPage {
             // Transfer card
             Column() {
               this.DetailRow($r('app.string.peer_detail_bytes_received'),
-                Formatters.bytes(this.peer()!.bytesRx), true, $r('app.color.nb_transfer_rx'))
+                Formatters.bytes(this.peer()!.bytesRx), true, $r('app.color.nb_transfer_rx'), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_bytes_sent'),
-                Formatters.bytes(this.peer()!.bytesTx), true, $r('app.color.nb_txt'))
+                Formatters.bytes(this.peer()!.bytesTx), true, $r('app.color.nb_txt'), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_status_since'),
-                Formatters.timeAgo(this.peer()!.connStatusUpdate), false, $r('app.color.nb_txt'))
+                Formatters.timeAgo(this.peer()!.connStatusUpdate), false, $r('app.color.nb_txt'), false)
             }
             .backgroundColor($r('app.color.info_row_bg'))
             .borderRadius(12)
@@ -149,11 +154,11 @@ export struct PeerDetailPage {
             Column() {
               this.DetailRow($r('app.string.peer_detail_local_ice'),
                 this.ice(this.peer()!.localIceCandidateEndpoint, this.peer()!.localIceCandidateType),
-                true, $r('app.color.nb_txt'))
+                true, $r('app.color.nb_txt'), false)
               Divider().color($r('app.color.nb_gray_separator'))
               this.DetailRow($r('app.string.peer_detail_remote_ice'),
                 this.ice(this.peer()!.remoteIceCandidateEndpoint, this.peer()!.remoteIceCandidateType),
-                true, $r('app.color.nb_txt'))
+                true, $r('app.color.nb_txt'), false)
             }
             .backgroundColor($r('app.color.info_row_bg'))
             .borderRadius(12)
