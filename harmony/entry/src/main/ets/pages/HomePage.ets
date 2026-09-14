@@ -20,22 +20,25 @@ export struct HomePage {
   @StorageLink(Keys.FQDN) fqdn: string = '';
   @StorageLink(Keys.IP) ip: string = '';
   @StorageLink(Keys.IPV6) ipv6: string = '';
-  @StorageLink(Keys.SESSION_EXPIRES) sessionExpires: number = 0;
+  @StorageLink(Keys.SESSION_EXPIRES) @Watch('refreshCountdown') sessionExpires: number = 0;
   @StorageLink(Keys.RESOURCES) resources: NetResource[] = [];
   @StorageLink(Keys.ACTIVE_PROFILE_ID) activeProfileId: string = '';
   @StorageLink(Keys.PROFILES) profiles: Profile[] = [];
 
   @State infoExpanded: boolean = false;
   @State exitNodeSheet: boolean = false;
-  @State sessionTick: number = 0;
+  // 倒计时文案必须落成 @State 才会重渲染：此前 sessionTick 自增但 build() 从未
+  // 引用它，倒计时文本实际永不刷新。
+  @State sessionCountdownText: string = '';
 
   private sessionTimer: number = -1;
 
   aboutToAppear(): void {
-    // Re-render the session countdown once a minute, as the Android home row does.
+    this.refreshCountdown();
+    // 每分钟重算一次倒计时文案，与 Android home 行为一致。
     this.sessionTimer = setInterval(() => {
-      this.sessionTick++;
-    }, 30_000);
+      this.refreshCountdown();
+    }, 60_000);
   }
 
   aboutToDisappear(): void {
@@ -43,6 +46,10 @@ export struct HomePage {
       clearInterval(this.sessionTimer);
       this.sessionTimer = -1;
     }
+  }
+
+  private refreshCountdown(): void {
+    this.sessionCountdownText = Formatters.sessionCountdown(this.sessionExpires);
   }
 
   private activeProfileName(): string {
@@ -256,7 +263,7 @@ export struct HomePage {
             .fontSize(22)
             .fontColor([$r('app.color.nb_txt_light')])
           Column() {
-            Text(Formatters.sessionCountdown(this.sessionExpires))
+            Text(this.sessionCountdownText)
               .fontSize(15)
               .fontWeight(FontWeight.Bold)
               .fontColor($r('app.color.nb_txt'))
@@ -280,8 +287,14 @@ export struct HomePage {
         .border({ width: 1, color: $r('app.color.info_row_stroke') })
         .margin({ bottom: 12 })
         .onClick(() => {
+          // 只在会话截止时间真的后移时提示，对齐 Android 的 extend 流程语义；
+          // 引擎拒绝延长（如未到期）时不弹假 toast。
+          const before: number = AppStorage.get<number>(Keys.SESSION_EXPIRES) ?? 0;
           EngineManager.getInstance().extendSession();
-          promptAction.showToast({ message: 'Session extended' });
+          const after: number = AppStorage.get<number>(Keys.SESSION_EXPIRES) ?? 0;
+          if (after > before) {
+            promptAction.showToast({ message: 'Session extended' });
+          }
         })
       }
 
