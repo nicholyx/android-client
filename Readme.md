@@ -46,6 +46,30 @@ You can download and install the app from the Google Play Store:
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" alt="Get it on Google Play" height="80">](https://play.google.com/store/apps/details?id=io.netbird.client)
 
 
+## HarmonyOS NEXT client
+
+本仓库同时维护 **HarmonyOS NEXT** 客户端（`harmony/` 子目录），采用 Stage 模型 +
+ArkTS + ArkUI 声明式 + Navigation 路由的官方最新标准技术栈，页面与 Android 版
+逐一对齐；VPN 引擎经抽象层隔离，当前注入 MockVpnEngine 驱动全部界面端到端演示，
+真实引擎接入时 UI 层零改动（详见架构文档）。
+
+CI 自动构建可安装的 HAP 测试包（Actions 页面 artifact `harmony-hap-debug` 下载，
+unsigned，真机安装需 AGC 调试证书）；Release 仅在人工验收后由维护者打 tag 发布。
+
+## Documentation
+
+| 文档 | 内容 |
+| --- | --- |
+| [docs/USAGE.md](docs/USAGE.md) | 构建安装：Android APK 与 HarmonyOS HAP、CI 拿包、签名、测试分层 |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | 架构与设计取舍：引擎抽象层、状态流、双端对照 |
+| [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) | 排错：SDK 版本、ohpm 注册表、ArkTS 编译错误、CI 失败 |
+| [docs/MAINTAINER_GUIDE.md](docs/MAINTAINER_GUIDE.md) | 维护者手册：仓库配置、开发闭环、发布流程、红线 |
+| [harmony/README.md](harmony/README.md) | HarmonyOS 工程细节：技术栈对照、页面映射、测试体系 |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | 贡献流程与提交规范 |
+| [CHANGELOG.md](CHANGELOG.md) | 更新日志 |
+
+路线图见 Roadmap Issue（链接在 Issue 列表置顶）。
+
 ## Building from source
 ### Requirements
 We need the following software:
