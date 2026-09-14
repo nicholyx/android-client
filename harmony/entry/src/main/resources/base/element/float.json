@@ -1,0 +1,12 @@
+{
+  "float": [
+    { "name": "page_horizontal_margin", "value": "20vp" },
+    { "name": "card_radius", "value": "12vp" },
+    { "name": "sheet_top_radius", "value": "25vp" },
+    { "name": "button_radius", "value": "6vp" },
+    { "name": "row_min_height", "value": "56vp" },
+    { "name": "list_bottom_inset", "value": "88vp" },
+    { "name": "status_dot_size", "value": "8vp" },
+    { "name": "divider_width", "value": "1vp" }
+  ]
+}

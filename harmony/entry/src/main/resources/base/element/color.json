@@ -1,0 +1,65 @@
+{
+  "color": [
+    { "name": "start_window_background", "value": "#F5F5F5" },
+    { "name": "white", "value": "#FFFFFF" },
+    { "name": "black", "value": "#000000" },
+
+    { "name": "nb_sheet_bg", "value": "#FFFFFF" },
+    { "name": "nb_bg", "value": "#F2F2F2" },
+    { "name": "nb_bg_peers", "value": "#F5F5F5" },
+    { "name": "nb_bg_home", "value": "#F5F5F5" },
+    { "name": "nb_bg_mask", "value": "#F2F2F2" },
+    { "name": "nb_gray_light", "value": "#F5F5F5" },
+    { "name": "nb_gray_dark", "value": "#4E4E4E" },
+    { "name": "nb_gray_bg", "value": "#EEEEEE" },
+    { "name": "nb_gray_separator", "value": "#DADADA" },
+    { "name": "nb_gray_border", "value": "#ECECEC" },
+    { "name": "nb_chip_border", "value": "#CFCFCF" },
+    { "name": "nb_toolbar_divider", "value": "#CFCFCF" },
+    { "name": "nb_orange", "value": "#F58431" },
+    { "name": "nb_orange_15", "value": "#26F58431" },
+    { "name": "nb_txt", "value": "#454545" },
+    { "name": "nb_txt_light", "value": "#7C7C7C" },
+    { "name": "nb_button_inactive", "value": "#4E4E4E" },
+
+    { "name": "nb_latency_good", "value": "#2E9E4F" },
+    { "name": "nb_latency_high", "value": "#B7791F" },
+    { "name": "nb_transfer_rx", "value": "#2B8FD4" },
+
+    { "name": "nb_bottom_nav_bg", "value": "#FFFFFF" },
+    { "name": "nb_chip_bg", "value": "#FFFFFF" },
+
+    { "name": "tab_unselected", "value": "#454545" },
+    { "name": "tab_icon_unselected", "value": "#4A4A4A" },
+    { "name": "tab_selected", "value": "#F58431" },
+
+    { "name": "thumb_on_color", "value": "#F58431" },
+    { "name": "thumb_off_color", "value": "#FFFFFF" },
+    { "name": "track_on_color", "value": "#89F58431" },
+    { "name": "track_off_color", "value": "#40000000" },
+
+    { "name": "connect_track_on", "value": "#F58431" },
+    { "name": "connect_track_off", "value": "#D0D0D0" },
+    { "name": "connect_track_off_stroke", "value": "#B5B5B5" },
+    { "name": "connect_thumb_on", "value": "#FFFFFF" },
+    { "name": "connect_thumb_off", "value": "#FFFFFF" },
+
+    { "name": "info_row_bg", "value": "#FFFFFF" },
+    { "name": "info_row_stroke", "value": "#1F000000" },
+
+    { "name": "profile_background", "value": "#F2F2F2" },
+    { "name": "profile_card_background", "value": "#FFFFFF" },
+
+    { "name": "nb_segment_track", "value": "#E7E7E7" },
+    { "name": "nb_segment_track_border", "value": "#DDDDDD" },
+    { "name": "nb_segment_thumb", "value": "#FFFFFF" },
+
+    { "name": "nb_danger", "value": "#DC2626" },
+
+    { "name": "status_connected", "value": "#2E9E4F" },
+    { "name": "status_connecting", "value": "#F58431" },
+    { "name": "status_idle", "value": "#B0B0B0" },
+    { "name": "status_disconnected", "value": "#B0B0B0" },
+    { "name": "status_error", "value": "#DC2626" }
+  ]
+}

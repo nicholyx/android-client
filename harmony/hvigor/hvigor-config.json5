@@ -1,0 +1,20 @@
+{
+  "modelVersion": "5.0.0",
+  "dependencies": {},
+  "execution": {
+    "daemon": true,
+    "incremental": true,
+    "parallel": true,
+    "typeCheck": false
+  },
+  "logging": {
+    "level": "info"
+  },
+  "pluginRepository": {
+    "registry": "https://repo.harmonyos.com/ohpm/",
+    "registries": {}
+  },
+  "nodeOptions": {
+    "maxOldSpaceSize": 8192
+  }
+}

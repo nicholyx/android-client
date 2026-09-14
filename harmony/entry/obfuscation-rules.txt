@@ -1,0 +1,13 @@
+# NetBird HarmonyOS obfuscation rules (release build).
+# Keep model / engine public APIs referenced across module boundaries.
+-enable-property-obfuscation
+-enable-toplevel-obfuscation
+-keep-global-name
+Peer
+Status
+Network
+Resource
+Profile
+ConnectionState
+VpnEngine
+EngineManager
