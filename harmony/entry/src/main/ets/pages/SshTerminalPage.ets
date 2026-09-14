@@ -20,6 +20,17 @@ export struct SshTerminalPage {
   private scroller: Scroller = new Scroller();
 
   private session(): SshSession | null {
+    // 优先按 sessionId 精确匹配（同 host 同 user 的两条会话曾互相串扰）；
+    // peer 详情直连路径没有会话记录，回落到 host+user。
+    if (this.target.sessionId.length > 0) {
+      for (let i = 0; i < this.sessions.length; i++) {
+        const s: SshSession = this.sessions[i];
+        if (s.id === this.target.sessionId) {
+          return s;
+        }
+      }
+      return null;
+    }
     for (let i = 0; i < this.sessions.length; i++) {
       const s: SshSession = this.sessions[i];
       if (s.host === this.target.host && s.user === this.target.user) {

@@ -150,7 +150,24 @@ export struct SshSessionsPage {
                     .fontSize(18)
                     .fontColor([$r('app.color.nb_danger')])
                     .padding(8)
-                    .onClick(() => EngineManager.getInstance().removeSshSession(session.id))
+                    // hitTestBehavior 阻断冒泡：此前删除时会同时触发整行的进终端跳转。
+                    .hitTestBehavior(HitTestMode.Block)
+                    .onClick(() => {
+                      AlertDialog.show({
+                        message: $r('app.string.ssh_delete_confirm'),
+                        primaryButton: {
+                          value: $r('app.string.action_cancel'),
+                          action: () => {}
+                        },
+                        secondaryButton: {
+                          value: $r('app.string.action_delete'),
+                          fontColor: $r('app.color.nb_danger'),
+                          action: () => {
+                            EngineManager.getInstance().removeSshSession(session.id);
+                          }
+                        }
+                      });
+                    })
                 }
                 .width('100%')
                 .constraintSize({ minHeight: 60 })
@@ -158,7 +175,7 @@ export struct SshSessionsPage {
                 .alignItems(VerticalAlign.Center)
                 .backgroundColor($r('app.color.info_row_bg'))
                 .onClick(() => AppNav.push(Routes.SSH_TERMINAL,
-                  new SshTarget(session.host, session.port, session.user)))
+                  new SshTarget(session.host, session.port, session.user, session.id)))
               }
             }, (session: SshSession) => session.id)
           }
