@@ -1,0 +1,8 @@
+# 关键路径的默认 reviewer。
+# 单人维护阶段全部指向维护者；后续加入协作者时按模块拆分。
+*                                       @nicholyx
+/.github/                               @nicholyx
+/harmony/                               @nicholyx
+/app/                                   @nicholyx
+/tool/                                  @nicholyx
+/scripts/                               @nicholyx
