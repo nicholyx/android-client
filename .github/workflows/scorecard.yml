@@ -20,6 +20,9 @@ jobs:
       # publish_results: true 需要 id-token 证明结果来自本仓库
       id-token: write
       contents: read
+      # upload-sarif 写 code scanning 需要它（此前漏配导致
+      # Resource not accessible by integration，main 上连续失败）
+      security-events: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
