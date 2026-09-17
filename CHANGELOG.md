@@ -26,6 +26,10 @@
 - 文档：USAGE / ARCHITECTURE / TROUBLESHOOTING / MAINTAINER_GUIDE 四件套
 - 测试：PeerSort 排序、MockVpnEngine 快速断开/重连竞态回归、
   sessionCountdown ceil 语义断言
+- 隧道解析器决策规则 `engine/TunnelDns.ets`：把「只有平台钉了 Private DNS
+  主机名才排除隧道解析器」落成纯函数（移植自上游 #266 的修复），并接入引擎缝
+  ——`VpnEngine.tunnelDnsServer()` 暴露隧道实际装入的解析器，
+  `VpnEngine.setAdvancedOptions()` 让高级设置真正下发到引擎
 
 ### 修复
 
@@ -41,6 +45,9 @@
   rosenpass permissive 与主开关联动门控
 - 详情页逐行复制（IP/IPv6/公钥），硬编码英文文案外置到资源，魔法存储 key
   收敛到 Keys 常量，版本号改经 bundleManager 读取
+- 高级设置此前只写进 AppStorage、从未到达引擎层——Advanced 里除主题外的开关
+  都是「有界面、无行为」的；现在经 `saveAdvanced` 下发给引擎（MockVpnEngine
+  消费 disableDns：打开后隧道不再装入 NetBird 解析器）
 
 ### 变更
 

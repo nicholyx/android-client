@@ -260,6 +260,8 @@ export class EngineManager implements EngineObserver {
 
   saveAdvanced(settings: AdvancedSettings): void {
     AppStorage.set<AdvancedSettings>(Keys.ADVANCED, settings);
+    // 下发给引擎：在此之前高级设置只停在 AppStorage，开关是「有界面、无行为」的。
+    this.engine.setAdvancedOptions(settings);
   }
 
   splitTunneling(): SplitTunnelConfig {

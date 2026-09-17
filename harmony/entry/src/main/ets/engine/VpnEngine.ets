@@ -1,5 +1,6 @@
 import { Peer } from '../model/Peer';
 import { Resource } from '../model/Resource';
+import { AdvancedSettings } from '../model/Settings';
 import { EngineObserver } from './EngineEvents';
 
 /*
@@ -30,6 +31,24 @@ export interface VpnEngine {
 
   /** Unix seconds at which the current auth session expires, 0 when unknown. */
   sessionExpiresAt(): number;
+
+  /**
+   * 隧道当前装入的解析器地址，空串表示没有装。
+   *
+   * 对齐 Android `IFace.prepareDnsSetting`：只有「用户禁用了 NetBird DNS」或
+   * 「平台把 Private DNS 钉在某个主机名上」时才不装——判据与来由见
+   * `TunnelDns.ets`（上游 PR #266 修过一次静默解析失败）。
+   */
+  tunnelDnsServer(): string;
+
+  /**
+   * 把高级设置下发给引擎。
+   *
+   * 对齐 Android 把用户配置传给 Go 内核的路径；在此之前鸿蒙侧的高级设置只写进
+   * AppStorage，从未到达引擎层，开关是「只有界面、没有行为」的。
+   * MockVpnEngine 目前只消费其中的 disableDns，其余字段由真实引擎接入时接上。
+   */
+  setAdvancedOptions(settings: AdvancedSettings): void;
 
   peers(): Peer[];
 

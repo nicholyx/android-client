@@ -67,6 +67,19 @@ engine/
 
 两条路径实现同一个 `VpnEngine` 接口。定稿前先出调研结论记录到本文件。
 
+### 隧道 DNS：解析器什么时候才不装
+
+`engine/TunnelDns.ets` 是这条规则的唯一落点，**判据是「平台是否钉了 Private DNS
+主机名」，不是「Private DNS 是否活跃」**。这不是随手定的——上游在这个判据上
+栽过一次（netbirdio/android-client PR #266）：用「活跃」标志时，Automatic 模式
+（运营商与不少家庭网络的默认状态）会被误判，NetBird 域名与自定义 DNS 区域静默
+解析失败，而且**能否解析取决于重建隧道时手机所在的网络**。只有钉了主机名时才真的
+冲突：系统把所有查询走 TLS 发给该主机并拒绝明文 DNS，隧道内的普通解析器必然全失败。
+
+鸿蒙目前没有等价平台能力，`MockVpnEngine` 按「未配置」处理；真实引擎接入时改从
+平台读取后传进同一个函数。规则本身是纯函数，被 logic-tests 完整覆盖——真实引擎
+落地时直接拿它当验收标准，不要重新发明判据。
+
 ## 状态流
 
 ```
@@ -89,6 +102,7 @@ EntryAbility.onCreate → EngineManager.getInstance().init()
 | `VPNService`（前台服务） | 待接入（平台能力见 Issue） | 长时任务 + 常驻通知 |
 | `PeersAdapter.sortPeers` | `PeerSort.compare` | 已连接优先 + 显示名 |
 | `Preferences`/`ProfileManager` | 待持久化（Issue） | 每次冷启动重置是已知缺口 |
+| `IFace.prepareDnsSetting` + `DNSWatch` | `TunnelDns` + `VpnEngine.tunnelDnsServer()` | 判据用主机名，见下节 |
 | xterm.js + WebView SSH | 原生终端视图（mock 回显） | 真实 SSH 见 Issue |
 
 ## 已知取舍记录

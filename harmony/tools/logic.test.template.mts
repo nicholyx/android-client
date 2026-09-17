@@ -15,6 +15,7 @@ import { SshSession, SshState } from './model/SshSession.mts';
 import { AdvancedSettings } from './model/Settings.mts';
 import { Keys, SplitTunnelMode } from './common/Constants.mts';
 import { MockVpnEngine } from './engine/MockVpnEngine.mts';
+import { TunnelDns } from './engine/TunnelDns.mts';
 import { EngineManager } from './engine/EngineManager.mts';
 
 async function sleep(ms) {
@@ -216,6 +217,35 @@ test('PeerSort: connected first then display name', () => {
   peers.sort(PeerSort.compare);
   assert.deepEqual(peers.map((p) => p.displayName()),
     ['alpha.netbird.cloud', 'mid.netbird.cloud', '100.72.1.4', 'zeta.netbird.cloud']);
+});
+
+// ----------------------------- TunnelDns -----------------------------
+// 规则移植自上游 netbirdio/android-client #266（提交 be8ec8e）：判据是
+// 「平台是否钉了 Private DNS 主机名」，不是「Private DNS 是否活跃」。
+test('TunnelDns keeps the resolver unless a Private DNS hostname is set', () => {
+  assert.ok(TunnelDns.shouldAddTunnelResolver(null), '未配置主机名（Off / Automatic）保留解析器');
+  assert.ok(TunnelDns.shouldAddTunnelResolver(''), '空主机名保留解析器');
+  assert.ok(!TunnelDns.shouldAddTunnelResolver('dns.example.com'), '严格模式主机名才排除');
+});
+
+test('TunnelDns.tunnelResolver honours the Disable DNS switch', () => {
+  const resolver = '100.72.68.1';
+  assert.equal(TunnelDns.tunnelResolver(false, null, resolver), resolver);
+  assert.equal(TunnelDns.tunnelResolver(false, 'dns.example.com', resolver), '');
+  assert.equal(TunnelDns.tunnelResolver(true, null, resolver), '', '用户禁用 NetBird DNS');
+  assert.equal(TunnelDns.tunnelResolver(true, 'dns.example.com', resolver), '');
+});
+
+test('MockVpnEngine installs the tunnel resolver until DNS is disabled', () => {
+  const eng = new MockVpnEngine();
+
+  eng.setAdvancedOptions(new AdvancedSettings());
+  assert.equal(eng.tunnelDnsServer(), '100.72.68.1', '默认装入解析器');
+
+  const disabled = new AdvancedSettings();
+  disabled.disableDns = true;
+  eng.setAdvancedOptions(disabled);
+  assert.equal(eng.tunnelDnsServer(), '', 'Disable DNS 之后不装');
 });
 
 // ----------------------------- EngineManager -----------------------------
