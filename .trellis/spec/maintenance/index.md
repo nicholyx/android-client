@@ -48,6 +48,21 @@ Issue（先有 Issue） → 分支 → 实现 + 测试 → PR → CI 全绿 → 
 4. 预发布 tag（含 `-`）自动 `--prerelease`，不占 latest
 5. 任何时候不主动 push tag / 创建 Release，只响应用户明确指令
 
+## 同步上游（Android 侧镜像）
+
+Android 侧保持与上游一致、**不做本地改写**，因此同步是「镜像」而不是合并两家改动。
+
+- 步骤：`git fetch upstream` → 看清有哪些新提交 → 建 `chore/sync-upstream` 分支
+  → `git merge upstream/main -m "chore: 同步上游 main（<主题>）"` → 更新
+  `.github/upstream-sync.txt` 为新值 → PR → CI → 合并
+- **用 merge commit 合并（`--merge`），不要 squash**：merge 让 git 记住已合过的
+  上游提交，后续同步只处理增量；squash 会让每次同步从分叉点重新比对
+- 完成后核对对齐：`git diff upstream/main HEAD --stat -- app/ tool/ gomobile/ netbird/`
+  应为空
+- **提交规范豁免**：上游提交信息不由我们命名。`--upstream-marker` 跳过
+  `.github/upstream-sync.txt` 所记提交**及其祖先**。判据必须是祖先关系——
+  作者/分支名/标签都可伪造，等于开后门；标记文件在仓库内受 PR 审查
+
 ## 路线图与追踪
 
 - **Roadmap Issue #25 是路线图单一事实来源**：规划后条目进「计划中」，
@@ -56,6 +71,16 @@ Issue（先有 Issue） → 分支 → 实现 + 测试 → PR → CI 全绿 → 
   owner 用 `@me`，当前看板编号 3）
 - 标签体系：bug/enhancement/documentation/ci/automation/governance/
   harmony/android/release/good first issue/help wanted
+
+## shell 脚本硬规则（scripts/ 与 CI 内联脚本）
+
+- **变量名不得紧贴中文**：`echo "跳过 $f（CI）"` 里 bash 会把多字节字符并入变量名，
+  报 `f?: unbound variable`。一律写 `${f}`。这类写法只在特定分支触发，极易潜伏
+  （lint.sh 真实案例：只在 shellcheck 未安装时才炸）
+- **`while IFS= read -r` 会丢掉没有尾换行的最后一行**，写
+  `while IFS= read -r line || [[ -n "$line" ]]` 兜底（`printf '%s'` 丢尾换行
+  是同一类陷阱的另一面）
+- 兼容 macOS 自带 bash 3.2：不用 `declare -A`、`mapfile`、`wait -n`、`tac`
 
 ## 其他红线
 
