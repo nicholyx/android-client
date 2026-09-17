@@ -18,7 +18,7 @@ for f in scripts/*.sh; do
   if command -v shellcheck >/dev/null 2>&1; then
     shellcheck "$f" || fail=1
   else
-    echo "shellcheck 未安装，跳过 $f（CI 中始终执行）"
+    echo "shellcheck 未安装，跳过 ${f}（CI 中始终执行）"
   fi
   bash -n "$f" || fail=1
 done
