@@ -84,6 +84,25 @@ engine/
 - **`MockVpnEngine` 的演示性质声明不得删除**（类注释、README、SECURITY.md
   三处都有）；改它的行为必须同步 logic-tests
 
+## 隧道 DNS 解析器规则（上游 #266 移植）
+
+`engine/TunnelDns.ets` 是这条判据的**唯一落点**：只有平台**钉了 Private DNS
+主机名**（严格模式）才把解析器排除在隧道外；Automatic 与 Off 都保留。
+
+- **不要退回「Private DNS 是否活跃」的判据**。该标志在 Automatic 模式下也为真
+  （运营商与不少家庭网络的默认状态），会让 NetBird 域名与自定义 DNS 区域静默
+  解析失败，且能否解析随手机当前所在网络变化。上游真踩过：
+  netbirdio/android-client PR #266 / 提交 be8ec8e。
+- 接入真实引擎时**复用这个函数**，不要重新发明判据；鸿蒙暂无平台等价能力，
+  真实实现落地时从平台读取后传进来即可。
+- 引擎缝的两个配套方法：
+  - `VpnEngine.tunnelDnsServer()` —— 隧道实际装入的解析器（空串表示没装），
+    对齐 Android `IFace.prepareDnsSetting`
+  - `VpnEngine.setAdvancedOptions()` —— 高级设置下发引擎的**唯一通道**；
+    在此之前高级设置只写 AppStorage，Advanced 里的开关是「有界面、无行为」的
+- 规则是纯函数，logic-tests 必须覆盖三种输入（`null` / 空串 / 主机名）
+  外加与 `disableDns` 的组合
+
 ## 测试与验证
 
 - **引擎/模型层改动必须补 `harmony/tools/logic-tests.mjs` 断言**——它把

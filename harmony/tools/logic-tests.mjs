@@ -16,7 +16,8 @@ const INCLUDE = [
   'model/Status.ets', 'model/ConnectionState.ets', 'model/Peer.ets', 'model/Resource.ets',
   'model/Profile.ets', 'model/SshSession.ets', 'model/Settings.ets',
   'common/Constants.ets', 'common/Formatters.ets',
-  'engine/EngineEvents.ets', 'engine/VpnEngine.ets', 'engine/MockVpnEngine.ets', 'engine/EngineManager.ets',
+  'engine/EngineEvents.ets', 'engine/VpnEngine.ets', 'engine/TunnelDns.ets',
+  'engine/MockVpnEngine.ets', 'engine/EngineManager.ets',
 ];
 
 function stripComments(s) {

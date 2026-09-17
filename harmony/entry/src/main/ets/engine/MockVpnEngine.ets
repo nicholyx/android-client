@@ -4,6 +4,8 @@ import { Peer } from '../model/Peer';
 import { PeerStatus, StatusMapper } from '../model/Status';
 import { Resource, NetworkDomain, RoutingPeer } from '../model/Resource';
 import { ConnectionState } from '../model/ConnectionState';
+import { AdvancedSettings } from '../model/Settings';
+import { TunnelDns } from './TunnelDns';
 
 /*
  * A fully in-process stand-in for the Go core so the HarmonyOS client is
@@ -31,6 +33,11 @@ export class MockVpnEngine implements VpnEngine {
   private static readonly FQDN: string = 'harmony-phone.netbird.cloud';
   private static readonly IP: string = '100.72.68.65';
   private static readonly IPV6: string = 'fd00:cafe::65';
+  // 演示用解析器地址，与上面的 overlay 地址同网段；真实引擎接入后由管理面下发。
+  private static readonly DNS_RESOLVER: string = '100.72.68.1';
+
+  /** 高级设置下发到引擎的那一份（此前只写进 AppStorage，从未到达引擎层）。 */
+  private advancedOptions: AdvancedSettings = new AdvancedSettings();
 
   setObserver(observer: EngineObserver | null): void {
     this.observer = observer;
@@ -56,6 +63,18 @@ export class MockVpnEngine implements VpnEngine {
 
   sessionExpiresAt(): number {
     return this.sessionDeadline;
+  }
+
+  tunnelDnsServer(): string {
+    // 鸿蒙目前没有「Private DNS 主机名」这类平台设置，按未配置处理（等价
+    // Android 的 Automatic / Off 两种状态）；判据与来由见 TunnelDns.ets。
+    // 真实引擎接入时改为从平台能力读取后传入同一个函数。
+    return TunnelDns.tunnelResolver(this.advancedOptions.disableDns, null,
+      MockVpnEngine.DNS_RESOLVER);
+  }
+
+  setAdvancedOptions(settings: AdvancedSettings): void {
+    this.advancedOptions = settings;
   }
 
   peers(): Peer[] {
