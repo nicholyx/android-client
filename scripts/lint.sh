@@ -23,12 +23,22 @@ for f in scripts/*.sh; do
   bash -n "$f" || fail=1
 done
 
-echo "==> [3/4] Conventional Commits 抽查（HEAD 最近一次提交）"
-head_subject="$(git log -1 --format=%s)"
-if bash scripts/check-commit-msg.sh --pr-title "$head_subject"; then
+echo "==> [3/4] Conventional Commits 抽查（最近 4 条我们命名的提交）"
+# 只检查我们命名的提交：上游镜像提交（祖先命中 .github/upstream-sync.txt）与
+# GitHub/git 自动生成的合并提交都由脚本跳过——PR 用 merge commit 合并时
+# （上游同步需要保留血缘，见 docs/MAINTAINER_GUIDE.md）main 上会周期性出现
+# "Merge pull request #N from …"，判它违规没有意义。
+cc_base="$(git rev-list --max-count=4 HEAD | tail -1)"
+if git rev-parse --verify --quiet "${cc_base}^" >/dev/null 2>&1; then
+  cc_range="${cc_base}^..HEAD"
+else
+  cc_range="HEAD"
+fi
+if bash scripts/check-commit-msg.sh --range "$cc_range" \
+     --upstream-marker .github/upstream-sync.txt; then
   :
 else
-  echo "（HEAD 提交标题不合规——本地直接提交也要遵循规范）"
+  echo "（最近提交里有标题不合规的——本地直接提交也要遵循规范）"
   fail=1
 fi
 
