@@ -80,7 +80,10 @@ jobs:
         run: |
           set -euo pipefail
           base="$(git merge-base "$PR_BASE" "$PR_HEAD")"
-          bash scripts/check-commit-msg.sh --pr-title "$PR_TITLE" --range "${base}..${PR_HEAD}"
+          # --upstream-marker 跳过上游镜像提交（合并 upstream 时带进来的，
+          # 提交信息不由我们命名）；豁免按祖先关系判定，见脚本内注释。
+          bash scripts/check-commit-msg.sh --pr-title "$PR_TITLE" --range "${base}..${PR_HEAD}" \
+            --upstream-marker .github/upstream-sync.txt
 
   zizmor:
     name: 工作流安全扫描（zizmor）
