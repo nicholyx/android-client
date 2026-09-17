@@ -1,0 +1,10 @@
+# 上游同步标记 —— 单一事实来源
+#
+# 记录本仓库最近一次同步的 netbirdio/android-client 提交。scripts/check-commit-msg.sh
+# 会跳过该提交及其祖先：上游提交信息不由我们命名，不该被本仓库的 Conventional
+# Commits 规则判红。豁免按祖先关系判定（精确、可审计），不按作者或分支名。
+#
+# 每次同步上游后把值更新为 `git rev-parse upstream/main`。
+# 格式：首个 40 位十六进制字段被采用，行尾可写备注。
+
+be8ec8e8023ed892ae343c606b60d2182ea22be4  # 2026-09-15 Fix DoT, keep the tunnel resolver when Private DNS is in Automatic mode (#266)
