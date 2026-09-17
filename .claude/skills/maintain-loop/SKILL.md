@@ -55,6 +55,14 @@ git -C . status --short && git log --oneline -3
 - 引擎层改动必须同步补 logic-tests（`harmony/tools/logic-tests.mjs`），
   它是真实引擎接入时的验收规格
 
+### shell 脚本（scripts/ 与 CI 内联）
+
+- **变量名不得紧贴中文**：`"跳过 $f（CI）"` 会让 bash 把多字节字符并入变量名，
+  报 `f?: unbound variable`；一律写 `${f}`。只在特定分支触发，极易潜伏
+  （`lint.sh` 真实案例：只在 shellcheck 未安装时才炸）
+- **`while IFS= read -r` 会丢没有尾换行的最后一行**：写
+  `while IFS= read -r line || [[ -n "$line" ]]` 兜底
+
 ## 四、测试（发布门禁第一道）
 
 ```bash
@@ -105,6 +113,27 @@ cd harmony && hvigorw assembleHap --mode module -p product=default -p buildMode=
 ## 八、发布后
 
 Roadmap 条目移入「已完成」（带 Issue/PR 链接）；开下一版本里程碑与 Issue。
+
+## 九、同步上游（Android 侧镜像）
+
+Android 侧保持与上游一致、只读；同步是「镜像」不是合并两家改动。
+
+```bash
+git fetch upstream --prune
+git log --oneline origin/main..upstream/main     # 有哪些新提交
+git checkout -b chore/sync-upstream origin/main
+git merge upstream/main -m "chore: 同步上游 main（<主题>）"
+# 更新 .github/upstream-sync.txt 为 `git rev-parse upstream/main` 的值
+git diff upstream/main HEAD --stat -- app/ tool/ gomobile/ netbird/   # 应为空
+```
+
+- **用 merge commit 合并（`gh pr merge --merge`），不要 squash**：merge 让 git
+  记住已合过的上游提交，后续同步只处理增量；squash 会让每次同步从分叉点重新
+  比对，冲突面越滚越大
+- 上游提交信息不由我们命名，`.github/upstream-sync.txt` + `--upstream-marker`
+  跳过该提交及其祖先。**判据必须是祖先关系**——作者/分支名/标签都能伪造
+- 上游改动若涉及鸿蒙要对齐的行为（如本次的 DNS 解析器判据），按第三节照常
+  立 Issue → 分支 → 移植 + 测试 → PR，不要塞进同步 PR 里
 
 ## 红线
 

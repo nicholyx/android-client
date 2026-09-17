@@ -64,6 +64,35 @@ JSON
 5. 预发布（tag 含 `-`，如 `v0.2.0-rc1`）自动 `--prerelease`，不占 latest
 6. 验证：`gh release view vX.Y.Z` 三段式内容齐全
 
+## 同步上游（Android 侧）
+
+本仓库是 [netbirdio/android-client](https://github.com/netbirdio/android-client)
+的 fork，但只维护 `harmony/`。Android 侧保持与上游一致，**不做本地改写**——
+所以上游同步是「镜像」而不是「合并两家改动」。
+
+```bash
+git fetch upstream --prune
+git log --oneline origin/main..upstream/main        # 看有哪些新提交
+git checkout -b chore/sync-upstream origin/main
+git merge upstream/main -m "chore: 同步上游 main（<主题>）"
+git rev-parse upstream/main > /dev/null             # 把新值写进 .github/upstream-sync.txt
+```
+
+随后照常走 PR → CI → 合并，但**用 merge commit 合并（`gh pr merge --merge`），
+不要 squash**：merge 让 git 记住「哪些上游提交已经合过了」，之后同步只处理增量；
+squash 会让每次同步都从分叉点重新比对，冲突面越滚越大。
+
+同步后核对真的对齐了：
+
+```bash
+git diff upstream/main HEAD --stat -- app/ tool/ gomobile/ netbird/   # 应为空
+```
+
+**提交规范为什么不会红？** 上游提交信息不由我们命名。`.github/upstream-sync.txt`
+记录最近同步的上游提交，`scripts/check-commit-msg.sh --upstream-marker` 跳过
+**该提交及其祖先**。判据是祖先关系而非作者/分支名/标签——那些都能伪造，等于给
+规范开后门；标记文件在仓库内受 PR 审查，且只能豁免已存在于上游历史的提交。
+
 ## 供应链基线
 
 - 所有**本仓库维护**的工作流 `uses:` pin 到 commit SHA（注释保留版本号），
