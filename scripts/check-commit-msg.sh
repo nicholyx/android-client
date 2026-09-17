@@ -64,6 +64,7 @@ fi
 
 violations=0
 skipped=0
+auto_merges=0
 
 if [[ -n "$range" ]]; then
   while IFS= read -r line || [[ -n "$line" ]]; do
@@ -74,6 +75,13 @@ if [[ -n "$range" ]]; then
     subject="${line#* }"
     if [[ -n "$upstream_sha" ]] && git merge-base --is-ancestor "$sha" "$upstream_sha" 2>/dev/null; then
       skipped=$((skipped + 1))
+      continue
+    fi
+    # 自动生成的合并提交（GitHub 的 "Merge pull request #N …"、git 的
+    # "Merge branch …"）不是我们命名的，不判——PR 用 merge commit 合并时
+    # main 上会周期性出现这类提交。我们自己用 -m 命名的合并提交仍会被检查。
+    if [[ "$subject" == "Merge pull request #"* || "$subject" == "Merge branch "* ]]; then
+      auto_merges=$((auto_merges + 1))
       continue
     fi
     if ! [[ "$subject" =~ $PATTERN ]]; then
@@ -92,6 +100,9 @@ fi
 
 if [[ $skipped -gt 0 ]]; then
   echo "（已跳过 ${skipped} 个上游镜像提交：祖先关系命中 ${upstream_sha}）"
+fi
+if [[ $auto_merges -gt 0 ]]; then
+  echo "（已跳过 ${auto_merges} 个自动生成的合并提交）"
 fi
 
 if [[ $violations -gt 0 ]]; then
