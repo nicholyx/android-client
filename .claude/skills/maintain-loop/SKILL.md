@@ -118,8 +118,12 @@ Roadmap 条目移入「已完成」（带 Issue/PR 链接）；开下一版本�
 
 Android 侧保持与上游一致、只读；同步是「镜像」不是合并两家改动。
 
+平时不必手动盯：`upstream-check` 工作流每周自动比对，有差异就开/更新
+`upstream-sync` 标签的 Issue（无差异静默、取不到上游则报错）。手动补查：
+
 ```bash
 git fetch upstream --prune
+bash scripts/check-upstream.sh --upstream-ref upstream/main --out /tmp/up.md  # 末行 HAS_UPDATES=true|false
 git log --oneline origin/main..upstream/main     # 有哪些新提交
 git checkout -b chore/sync-upstream origin/main
 git merge upstream/main -m "chore: 同步上游 main（<主题>）"

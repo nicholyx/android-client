@@ -52,6 +52,10 @@ Issue（先有 Issue） → 分支 → 实现 + 测试 → PR → CI 全绿 → 
 
 Android 侧保持与上游一致、**不做本地改写**，因此同步是「镜像」而不是合并两家改动。
 
+- **自动周检**：`.github/workflows/upstream-check.yml` 每周比对上游——有差异自动
+  开/更新 `upstream-sync` 标签的 Issue，无差异静默，**取不到上游时任务失败而非
+  当成无更新**；同一时间只保留一个待跟进 Issue，避免刷屏。本地可用
+  `bash scripts/check-upstream.sh --upstream-ref upstream/main --out <文件>`
 - 步骤：`git fetch upstream` → 看清有哪些新提交 → 建 `chore/sync-upstream` 分支
   → `git merge upstream/main -m "chore: 同步上游 main（<主题>）"` → 更新
   `.github/upstream-sync.txt` 为新值 → PR → CI → 合并

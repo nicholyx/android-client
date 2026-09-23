@@ -70,6 +70,33 @@ JSON
 的 fork，但只维护 `harmony/`。Android 侧保持与上游一致，**不做本地改写**——
 所以上游同步是「镜像」而不是「合并两家改动」。
 
+### 自动周检（已配置）
+
+平时不必手动盯着——`.github/workflows/upstream-check.yml` 每周一自动比对上游：
+
+- **有差异**：自动开一个 `upstream-sync` 标签的 Issue（已存在则更新正文），
+  内含提交清单、上游改动范围、同步步骤与「涉及鸿蒙要对齐的行为要另立 Issue」
+  的提醒
+- **无差异**：静默结束，不产生任何通知
+- **取不到上游**：任务失败报错，**不会**被当成「无更新」——静默失败会让周检变成摆设
+
+同一时间只保留**一个**待跟进 Issue（按 `upstream-sync` 标签查找），避免每周刷屏；
+同步完关闭即可，下次有新提交会自动重开。想立刻查可以手动触发：
+
+```bash
+gh workflow run upstream-check.yml -R nicholyx/android-client
+```
+
+本地也可以直接跑比对脚本：
+
+```bash
+git fetch upstream --prune
+bash scripts/check-upstream.sh --upstream-ref upstream/main --out /tmp/up.md
+# 末行 HAS_UPDATES=true|false；为 true 时 /tmp/up.md 就是 Issue 正文
+```
+
+### 手动同步
+
 ```bash
 git fetch upstream --prune
 git log --oneline origin/main..upstream/main        # 看有哪些新提交
