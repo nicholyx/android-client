@@ -30,6 +30,9 @@
   主机名才排除隧道解析器」落成纯函数（移植自上游 #266 的修复），并接入引擎缝
   ——`VpnEngine.tunnelDnsServer()` 暴露隧道实际装入的解析器，
   `VpnEngine.setAdvancedOptions()` 让高级设置真正下发到引擎
+- 上游更新自动周检：`upstream-check` 工作流每周比对 netbirdio/android-client，
+  有差异自动开/更新 `upstream-sync` 标签的 Issue（含提交清单、改动范围与同步
+  步骤），无差异静默；配套 `scripts/check-upstream.sh` 可本地手动比对
 
 ### 修复
 

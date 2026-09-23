@@ -1,0 +1,80 @@
+name: upstream check
+
+# 周期性比对上游 netbirdio/android-client，有差异就开/更新一个提醒 Issue。
+# 只读上游、只写 Issue：**不自动合并、不自动改代码**——是否移植由人判断
+# （涉及鸿蒙要对齐的行为时要另立 Issue，见 docs/MAINTAINER_GUIDE.md）。
+on:
+  schedule:
+    # 每周一 06:23 UTC（分钟避开整点，降低与全网定时任务挤兑）。
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: upstream-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: 检查上游更新
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write  # 只为开/更新同步提醒 Issue；不改代码、不碰 PR
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch upstream
+        run: |
+          set -euo pipefail
+          git remote add upstream https://github.com/netbirdio/android-client.git
+          git fetch --no-tags upstream main
+
+      - name: 比对差异
+        id: diff
+        run: |
+          set -euo pipefail
+          # 脚本在上游 ref 取不到时以非零码退出——这里不做兜底，
+          # 让步骤失败。把「取不到上游」当成「无更新」会让周检变成摆设。
+          output="$(bash scripts/check-upstream.sh \
+            --upstream-ref upstream/main --out /tmp/upstream-issue.md)"
+          printf '%s\n' "$output"
+          last="$(printf '%s\n' "$output" | tail -1)"
+          case "$last" in
+            HAS_UPDATES=true) echo "has_updates=true" >> "$GITHUB_OUTPUT" ;;
+            HAS_UPDATES=false) echo "has_updates=false" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::无法解析比对结论：${last}"; exit 1 ;;
+          esac
+
+      - name: 无更新（静默结束）
+        if: steps.diff.outputs.has_updates == 'false'
+        run: echo "上游无新提交，符合预期，不产生任何通知。"
+
+      - name: 打开或更新同步提醒 Issue
+        if: steps.diff.outputs.has_updates == 'true'
+        env:
+          # gh 用 token 认证；仓库名走内置环境变量，避免 ${{ }} 进 run:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          # 同一时间只保留一个待跟进 Issue：已存在就更新正文（新提交会刷新
+          # 清单），避免每周刷屏。
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" \
+            --label upstream-sync --state open --limit 1 \
+            --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --repo "$GITHUB_REPOSITORY" \
+              --body-file /tmp/upstream-issue.md
+            echo "已更新既有同步 Issue #${existing}"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" \
+              --title "chore: 上游有新提交待同步" \
+              --body-file /tmp/upstream-issue.md \
+              --label upstream-sync
+          fi

@@ -108,7 +108,8 @@ jobs:
             .github/workflows/welcome.yml \
             .github/workflows/stale.yml \
             .github/workflows/release.yml \
-            .github/workflows/scorecard.yml
+            .github/workflows/scorecard.yml \
+            .github/workflows/upstream-check.yml
 
   ci-summary:
     name: CI 总览
